@@ -1,92 +1,64 @@
+/* Reset básico */
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    background-color: #fafafa;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
 }
 
-.contenedor {
-    max-width: 1000px;
-    margin: 20px auto;
-    border: 3px solid #333;
-    padding: 20px;
-    background-color: #fff;
-}
-
-/* Logo y nombre */
-.logo-barrio {
+/* Encabezado */
+header {
     display: flex;
     align-items: center;
-    margin-bottom: 15px;
+    padding: 10px 20px;
+    background-color: #f5f5f5;
 }
 
-.logo {
-    width: 60px;
-    height: 60px;
-    margin-right: 15px;
+header .logo img {
+    height: 50px;
+    width: auto;
+    display: block;
 }
 
-#nombre-barrio {
-    font-size: 1.8em;
-    margin: 0;
+header h1 {
+    margin: 0 0 0 15px;
+    font-size: 24px;
+    color: #222;
 }
 
-/* Menú horizontal */
-.menu {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-bottom: 20px;
-}
-
-.menu a {
-    text-decoration: none;
-    color: #0077cc;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.menu a:hover {
-    text-decoration: underline;
-}
-
-/* Imagen con texto sobrepuesto */
-.imagen-barrio {
+/* Imagen del barrio */
+.image-container {
     position: relative;
-    width: 100%;
+    text-align: center;
     margin-bottom: 20px;
 }
 
-.imagen-barrio img {
+.image-container img {
     width: 100%;
     height: auto;
     display: block;
 }
 
-.texto-sobre-imagen {
+.image-title {
     position: absolute;
-    top: 50%;
+    bottom: 10px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2em;
-    font-weight: bold;
+    transform: translateX(-50%);
     color: white;
-    background-color: rgba(0,0,0,0.5);
-    padding: 10px 20px;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+}
+
+/* Contenedor del mapa */
+.map-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#map {
+    width: 90%;
+    height: 500px;
+    border: 2px solid #ccc;
     border-radius: 8px;
-    text-align: center;
-}
-
-/* Mapa */
-.ubicacion h3 {
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-#mapa {
-    width: 900px;      /* ancho fijo como en la imagen */
-    height: 500px;     /* alto fijo como en la imagen */
-    border: 1px solid #ccc;
-    margin: 0 auto;    /* centrar horizontalmente */
-    display: block;
 }
