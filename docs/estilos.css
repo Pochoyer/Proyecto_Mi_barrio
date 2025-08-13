@@ -1,93 +1,14 @@
+html, body { height: 100%; }
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background: #f6f7fb; }
 
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #fafafa;
+.topbar {
+  background: #111827;
+  color: #fff;
+  padding: 10px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
 }
 
-.contenedor {
-    max-width: 1000px;
-    margin: 20px auto;
-    border: 3px solid #333;
-    padding: 20px;
-    background-color: #fff;
-}
-
-/* Logo y nombre */
-.logo-barrio {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.logo {
-    width: 60px;
-    height: 60px;
-    margin-right: 15px;
-}
-
-#nombre-barrio {
-    font-size: 1.8em;
-    margin: 0;
-}
-
-/* Menú horizontal */
-.menu {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-bottom: 20px;
-}
-
-.menu a {
-    text-decoration: none;
-    color: #0077cc;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.menu a:hover {
-    text-decoration: underline;
-}
-
-/* Imagen con texto sobrepuesto */
-.imagen-barrio {
-    position: relative;
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-.imagen-barrio img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-.texto-sobre-imagen {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2em;
-    font-weight: bold;
-    color: white;
-    background-color: rgba(0,0,0,0.5);
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-/* Mapa */
-.ubicacion h3 {
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-#mapa {
-    width: 900px;      /* ancho fijo como en la imagen */
-    height: 500px;     /* alto fijo como en la imagen */
-    border: 1px solid #ccc;
-    margin: 0 auto;    /* centrar horizontalmente */
-    display: block;
+#map {
+  height: calc(100% - 56px); /* ocupa el resto de la pantalla bajo el header */
+  width: 100%;
 }
