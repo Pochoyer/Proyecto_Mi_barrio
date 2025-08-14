@@ -45,8 +45,8 @@ header h1 {
     transform: translate(-50%, -50%);
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
-    padding: 10px 20px;
-    font-size: 2em;
+    padding: 10px 10px;
+    font-size: 80px;
     border-radius: 8px;
 }
 
