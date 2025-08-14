@@ -1,12 +1,12 @@
 /* Estilos de la sección Acerca */
 .acerca .about{
-  display:grid; gap:14px;
+  display: grid; gap: 14px;
 }
 @media (min-width:760px){
-  .acerca .about{ grid-template-columns:repeat(2,1fr) }
+  .acerca .about{ grid-template-columns: repeat(2, 1fr); }
 }
 .acerca h3{
-  margin:.2rem 0 .4rem; color:var(--primary);
+  margin: .2rem 0 .4rem; color: var(--primary, #06b6d4);
 }
 .acerca ul{
   margin:.2rem 0 0; padding-left:18px; color:#cbd5e1;

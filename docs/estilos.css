@@ -1,65 +1,104 @@
-/* Reset básico */
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+/* ====== Base ====== */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+:root{
+  --c-bg: #f9f9f9;
+  --c-surface: #fff;
+  --c-muted: #f5f5f5;
+  --c-text: #222;
+  --c-border: #ddd;
+  --radius: 8px;
+  --fs-title: clamp(24px, 8vw, 80px);
 }
 
-/* Encabezado */
-header {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #f5f5f5;
+body{
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  line-height: 1.45;
 }
 
-header .logo img {
-    height: 50px;
-    width: auto;
-    display: block;
+img{ max-width: 100%; display:block; height:auto; }
+
+/* ====== Layout ====== */
+.pagina{
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--c-surface);
 }
 
-header h1 {
-    margin: 0 0 0 15px;
-    font-size: 24px;
-    color: #222;
+.site-header{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--c-muted);
+  border-bottom: 1px solid var(--c-border);
 }
 
-/* Imagen del barrio */
-.image-container {
-    position: relative;
-    text-align: center;
-    margin-bottom: 20px;
+.site-header .logo img{
+  height: 60px; width: auto;
 }
 
-.image-container img {
-    width: 100%;
-    height: auto;
-    display: block;
+.site-title{
+  margin: 0;
+  font-size: 1.8rem;
+  color: #333;
 }
 
-.image-title {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 10px 10px;
-    font-size: 80px;
-    border-radius: 8px;
+.main-nav{
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px 0;
+  background-color: #e0e0e0;
+}
+.main-nav a{
+  text-decoration: none;
+  font-weight: 700;
+  color: #333;
+  font-size: 18px;
 }
 
-/* Contenedor del mapa */
-.map-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+/* ====== Componentes comunes ====== */
+.image-container{
+  position: relative;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.image-title{
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0,0,0,.5);
+  color: #fff;
+  padding: 10px;
+  font-size: var(--fs-title);
+  border-radius: var(--radius);
+  line-height: 1.1;
 }
 
-#map {
-    width: 90%;
-    height: 500px;
-    border: 2px solid #ccc;
-    border-radius: 8px;
+.map-container{
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+#map{
+  width: 90%;
+  height: 500px;
+  border: 2px solid #ccc;
+  border-radius: var(--radius);
+}
+
+.site-footer{
+  background: #222;
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+  margin-top: 20px;
 }
