@@ -1,146 +1,148 @@
-<!doctype html>
+=======
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sitio | Barra con 3 componentes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Villa Anny II</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="estilos.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #ccc;
+            font-family: Arial, sans-serif;
+        }
+        .pagina {
+            max-width: 1200px; /* Ancho máximo de la página */
+            margin: auto;
+            border: 5px solid #000; /* Marco negro */
+            background-color: white;
+            box-sizing: border-box;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f8f8f8;
+            position: relative; /* Contenedor de referencia para el título */
+        }
+        header img {
+            height: 60px;
+        }
+        header h1 {
+            position: absolute; /* Posicionamiento absoluto */
+            left: 50%; /* Lo mueve al centro */
+            transform: translateX(-50%); /* Ajuste fino para centrado exacto */
+            font-size: 1.8em;
+            margin: 0;
+            color: #333;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #e0e0e0;
+            padding: 10px 0;
+        }
+        nav a {
+            margin: 0 20px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #333;
+            font-size: 18px;
+        }
+        .image-container {
+            position: relative;
+            text-align: center;
+            margin-bottom: 20px; /* Espacio antes del mapa */
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .image-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px 10px;
+            font-size: 80px;
+            border-radius: 8px;
+        }
 
-  <!-- Hojas de estilo por componente -->
-  <link rel="stylesheet" href="css/equipamientos.css">
-  <link rel="stylesheet" href="css/problematicas.css">
-  <link rel="stylesheet" href="css/acerca.css">
-
-  <style>
-    :root{
-      --bg:#0f172a;         /* slate-900 */
-      --panel:#111827;      /* gray-900 */
-      --muted:#94a3b8;      /* slate-400 */
-      --text:#e5e7eb;       /* gray-200 */
-      --primary:#22d3ee;    /* cyan-400 */
-      --primary-2:#06b6d4;  /* cyan-500 */
-      --ring: #334155;      /* slate-700 */
-      --radius: 14px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
-      background:linear-gradient(160deg, var(--bg), #020617);
-      color:var(--text);
-      min-height:100dvh; display:flex; flex-direction:column;
-    }
-    header{
-      position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(8px);
-      background:linear-gradient(180deg, rgba(2,6,23,.65), rgba(2,6,23,.35));
-      border-bottom:1px solid var(--ring);
-    }
-    .nav{
-      max-width:1100px; margin:0 auto; padding:12px 16px; display:flex; gap:8px; align-items:center;
-    }
-    .brand{font-weight:700; letter-spacing:.3px; margin-right:auto}
-    .tabs{display:flex; gap:6px; flex-wrap:wrap}
-    .tab-btn{
-      appearance:none; border:none; cursor:pointer;
-      padding:10px 14px; border-radius:999px;
-      color:var(--text); background:transparent;
-      outline-offset:4px; transition:all .2s ease;
-      border:1px solid transparent;
-    }
-    .tab-btn:hover{ border-color:var(--ring); transform:translateY(-1px) }
-    .tab-btn[aria-selected="true"]{
-      background:linear-gradient(180deg, var(--primary), var(--primary-2));
-      color:#061118; font-weight:600; box-shadow:0 8px 20px rgba(34,211,238,.25);
-    }
-    main{ max-width:1100px; width:100%; margin:20px auto; padding:0 16px 48px; flex:1; }
-    .panel{
-      border:1px solid var(--ring); border-radius:var(--radius);
-      background:linear-gradient(180deg, rgba(17,24,39,.6), rgba(17,24,39,.35));
-      box-shadow:0 10px 30px rgba(0,0,0,.25);
-    }
-    .section{
-      display:none; padding:22px;
-      animation:fade .2s ease-out;
-    }
-    .section[data-active="true"]{ display:block; }
-    @keyframes fade { from{opacity:.5; transform:translateY(4px)} to{opacity:1; transform:none} }
-    footer{ color:var(--muted); font-size:.9rem; padding:16px; text-align:center; border-top:1px solid var(--ring) }
-    /* Helpers */
-    h1,h2{ margin:.2rem 0 1rem }
-    p{ color:#cbd5e1; line-height:1.6 }
-    .grid{ display:grid; gap:14px }
-    @media (min-width:760px){ .grid-2{ grid-template-columns:repeat(2,1fr) } }
-  </style>
+        #map {
+            width: 100%;
+            height: 500px; /* Tamaño del mapa */
+        }
+        footer {
+            background: #222;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px; /* Espacio antes del pie de página */    
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <nav class="nav" aria-label="Navegación principal">
-      <div class="brand">Mi Sitio</div>
-      <div class="tabs" role="tablist" aria-label="Secciones">
-        <button class="tab-btn" role="tab" data-target="equipamientos" aria-selected="true">Equipamientos</button>
-        <button class="tab-btn" role="tab" data-target="problematicas" aria-selected="false">Problemáticas</button>
-        <button class="tab-btn" role="tab" data-target="acerca" aria-selected="false">Acerca de…</button>
-      </div>
+
+<div class="pagina">
+
+    <header>
+        <a href="index.html" class="logo">
+            <img src="imagenes/Logo.png" alt="Logo">
+        </a>
+        <h1>Villa Anny II</h1>
+    </header>
+
+    <nav>
+        <a href="equipamientos.html">Equipamientos</a>
+        <a href="#">Movilidad</a>
+        <a href="#">Problemáticas</a>
+        <a href="#">Acerca de</a>
     </nav>
-  </header>
 
-  <main>
-    <div class="panel">
-      <!-- Equipamientos -->
-      <section id="equipamientos" class="section equipamientos" data-active="true" role="tabpanel" aria-labelledby="tab-equipamientos">
-        <h2>Equipamientos</h2>
-        <p>Listado y estado de los equipamientos destacados.</p>
-        <div class="grid grid-2">
-          <article class="card">
-            <h3>Centro Cultural</h3>
-            <p>Capacidad 450 personas. Última intervención 2023.</p>
-            <button class="btn">Ver detalles</button>
-          </article>
-          <article class="card">
-            <h3>Polideportivo</h3>
-            <p>Pistas múltiples, gimnasio y zonas verdes.</p>
-            <button class="btn">Ver detalles</button>
-          </article>
-        </div>
-      </section>
-
-      <!-- Problemáticas -->
-      <section id="problematicas" class="section problematicas" role="tabpanel" aria-labelledby="tab-problematicas">
-        <h2>Problemáticas</h2>
-        <p>Mapa y lista de problemáticas priorizadas por severidad.</p>
-        <ul class="issues">
-          <li><span class="badge sev-high">Alta</span> Falta de iluminación en parques principales</li>
-          <li><span class="badge sev-mid">Media</span> Mantenimiento de vías secundarias</li>
-          <li><span class="badge sev-low">Baja</span> Señalética peatonal desactualizada</li>
-        </ul>
-        <div class="actions">
-          <button class="btn outline" data-action="reportar">Reportar nueva</button>
-          <button class="btn" data-action="filtrar">Filtrar</button>
-        </div>
-      </section>
-
-      <!-- Acerca -->
-      <section id="acerca" class="section acerca" role="tabpanel" aria-labelledby="tab-acerca">
-        <h2>Acerca de…</h2>
-        <p>Proyecto web minimalista con barra de 3 componentes, accesible y responsiva.</p>
-        <div class="about">
-          <div>
-            <h3>Objetivo</h3>
-            <p>Centralizar información urbana en una interfaz clara.</p>
-          </div>
-          <div>
-            <h3>Tecnologías</h3>
-            <ul>
-              <li>HTML semántico</li>
-              <li>CSS modular por componente</li>
-              <li>JavaScript ligero (tabs sin recarga)</li>
-            </ul>
-          </div>
-        </div>
-      </section>
+    <div class="image-container">
+        <img src="img_1.JPG" alt="Imagen Barrio">
+        <div class="image-title">Villa Anny II</div>
     </div>
-  </main>
 
-  <footer>© 2025 — Demo de navegación por componentes</footer>
+    <div id="map"></div>
 
-  <script src="js/programa.js" defer></script>
+    <footer>
+        &copy; 2025 Mi Barrio. Todos los derechos reservados.
+    </footer>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    
+    // Crear mapa con zoom fijo
+    var map = L.map('map').setView([4.6500, -74.1000], 12); 
+    // ↑ Cambia lat/lon por el centro exacto del barrio
+
+    // Capa base
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Cargar polígono desde carpeta capas
+    fetch('capas/Villa_Anny_II.geojson')
+        .then(response => response.json())
+        .then(data => {
+            L.geoJSON(data, {
+                style: {
+                    color: 'blue',
+                    weight: 2,
+                    fillOpacity: 0.4
+                }
+            }).addTo(map);
+        });
+</script>
+>>>>>>> origin/master
 </body>
 </html>
