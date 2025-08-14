@@ -1,0 +1,64 @@
+/* Reset básico */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+/* Encabezado */
+header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f5f5f5;
+}
+
+header .logo img {
+    height: 50px;
+    width: auto;
+    display: block;
+}
+
+header h1 {
+    margin: 0 0 0 15px;
+    font-size: 24px;
+    color: #222;
+}
+
+/* Imagen del barrio */
+.image-container {
+    position: relative;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.image-title {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+}
+
+/* Contenedor del mapa */
+.map-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#map {
+    width: 90%;
+    height: 500px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}
