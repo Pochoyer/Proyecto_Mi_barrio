@@ -6,36 +6,6 @@
     <title>Equipamientos - Parques en Villa Anny II</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="estilos.css"> <!-- Nombre corregido -->
-    <style>
-        #map {
-            height: 500px;
-            width: 100%;
-            border: 2px solid #ccc;
-            box-sizing: border-box;
-        }
-        .leyenda {
-            position:absolute;
-            z-index:500;
-            right:20px;
-            top:20px;
-            background:#fff;
-            padding:8px 10px;
-            border-radius:8px;
-            box-shadow:0 2px 8px rgba(0,0,0,.15);
-            font-size:13px;
-            line-height:1.35;
-        }
-        .chip {
-            display:inline-block;
-            width:12px;
-            height:12px;
-            border-radius:2px;
-            margin-right:6px;
-            vertical-align:middle;
-        }
-        .chip-poligono { background:#3388ff }
-        .chip-parque { background:#2e7d32 }
-    </style>
 </head>
 <body>
     <div class="pagina">
@@ -56,7 +26,7 @@
             <div id="map"></div>
             <div class="leyenda">
                 <div><span class="chip chip-poligono"></span>Polígono del barrio</div>
-                <div><span class="chip chip-parque"></span>Parques (OSM)</div>
+                <div><span class="chip chip-parque"></span>Parque</div>
             </div>
         </main>
 
@@ -67,5 +37,6 @@
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="equipamientos.js"></script>
+
 </body>
 </html>
