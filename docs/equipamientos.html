@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equipamientos - Parques en Villa Anny II</title>
+    <title>Equipamientos - Villa Anny II</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="estilos.css"> <!-- Nombre corregido -->
 </head>
@@ -11,7 +11,7 @@
     <div class="pagina">
         <header>
             <a href="index.html"><img src="imagenes/Logo.png" alt="Logo"></a>
-            <h1>Equipamientos: Parques en Villa Anny II</h1>
+            <h1>Equipamientos: Villa Anny II</h1>
         </header>
 
         <nav>
@@ -19,16 +19,44 @@
             <a href="equipamientos.html" class="active">Equipamientos</a>
             <a href="#">Movilidad</a>
             <a href="#">Problemáticas</a>
-            <a href="acerca_de.html">Acerca de</a>
+            <a href="acercade.html">Acerca de</a>
         </nav>
 
         <main>
-            <div id="map"></div>
-            <div class="leyenda">
-                <div><span class="chip chip-poligono"></span>Polígono del barrio</div>
-                <div><span class="chip chip-parque"></span>Parque</div>
-            </div>
+            <h2>Equipamientos en Villa Anny II</h2>
+            <p>En esta sección se presentan los equipamientos más relevantes del barrio, incluyendo parques y humedales.
+            <br>Los equipamientos son esenciales para la calidad de vida de los residentes, proporcionando espacios recreativos y áreas verdes.
+            <br>Los siguientes mapas muestran la ubicación de los principales equipamientos en Villa Anny II.</p>
+            <h2>Parque La Tingua Tibanica</h2>
         </main>
+
+    <!-- Primer bloque: Parque -->
+    <main style="display:flex; gap:10px; margin-bottom:30px;">
+      <!-- Mapa de Parque -->
+      <div id="map" style="flex:3; height:500px; border:2px solid #ccc;"></div>
+
+      <!-- Panel lateral -->
+      <div id="info-parque" style="flex:1; border:2px solid #ccc; padding:10px; background:#fff;">
+        <h3>Información del parque</h3>
+        <p>Seleccione el polígono del parque para ver detalles...</p>
+      </div>
+    </main>
+
+    <main>
+        <h2>Humedal Tibanica</h2>
+    </main>
+
+    <!-- Segundo bloque: Humedal -->
+    <main style="display:flex; gap:10px;">
+      <!-- Mapa de Humedal -->
+      <div id="map-humedal" style="flex:3; height:500px; border:2px solid #ccc;"></div>
+
+      <!-- Panel lateral -->
+      <div id="info-humedal" style="flex:1; border:2px solid #ccc; padding:10px; background:#fff;">
+        <h3>Información del humedal</h3>
+        <p>Seleccione el polígono del humedal para ver detalles...</p>
+      </div>
+    </main>
 
         <footer>
             <p>© 2025 Todos los derechos reservados</p>

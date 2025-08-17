@@ -76,3 +76,23 @@ footer {
     padding: 10px 0;
     margin-top: 20px; /* Espacio antes del pie de página */    
 }
+/* Centrar el título en la parte superior del mapa */
+.leaflet-top .titulo-mapa {
+  left: 50%;
+  transform: translateX(-50%);
+  position: relative;
+}
+
+/* Estilo del título */
+.titulo-mapa {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: darkgreen;
+  text-align: left;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  margin: 5px;
+}
