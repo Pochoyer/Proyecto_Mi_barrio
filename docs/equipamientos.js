@@ -1,100 +1,212 @@
 (async () => {
-    const map = L.map('map');
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+  const map = L.map('map');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-    const overpassURL = 'https://overpass.kumi.systems/api/interpreter';
+  // Ícono del parque (árbol)
+  const iconoParque = L.icon({
+    iconUrl: 'imagenes/arbol.png', // 📌 icono árbol
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
 
-    async function safeFetchJSON(url, options) {
-        const res = await fetch(url, options);
-        const text = await res.text();
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            console.error("⚠️ La respuesta no es JSON:", text.substring(0, 200));
-            return null;
-        }
-    }
+  // Título fijo en la parte inferior izquierda del mapa
+  const titulo = L.control({ position: 'bottomleft' });
+  titulo.onAdd = function () {
+    const div = L.DomUtil.create('div', 'titulo-mapa');
+    div.innerHTML = "<h3>Parques en Villa Anny II</h3>";
+    return div;
+  };
+  titulo.addTo(map);
+  
+  const infoBox = document.getElementById("info-parque");
 
-    // 1️⃣ Cargar polígono
-    let barrioGeoJSON = await safeFetchJSON('capas/Villa_Anny_II.geojson');
-    if (!barrioGeoJSON) {
-        console.error("❌ No se pudo cargar el GeoJSON del barrio.");
-        return;
-    }
+  async function cargarGeoJSON(url, style, popupParque = false, popupProp = null, addMarker = false) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+      const data = await res.json();
 
-    const capaBarrio = L.geoJSON(barrioGeoJSON, {
-        style: { color: 'blue', weight: 2, fillOpacity: 0 }
-    }).addTo(map);
+      const capa = L.geoJSON(data, {
+        style: style,
+        onEachFeature: (feature, layer) => {
+          if (popupParque) {
+            const nombre = feature.properties?.[popupProp] || "Parque sin nombre";
+            const barrio = "Villa Anny II";
+            const direccion = "TV 77 G N° 71 D - 03";
+            const localidad = "Bosa";
+            const imagen = "imagenes/parque.png"; // 📌 foto real del parque
 
-    function getOuterRingCoordinates(geojson) {
-        const feat = geojson.type === 'FeatureCollection' ? geojson.features[0] : geojson;
-        const geom = feat.geometry || feat;
-        if (geom.type === 'Polygon') return geom.coordinates[0];
-        if (geom.type === 'MultiPolygon') return geom.coordinates[0][0];
-        return null;
-    }
+            const contenidoPopup = `
+              <div style="text-align:center">
+                <h3>${nombre}</h3>
+                <p><b>Barrio:</b> ${barrio}</p>
+                <img src="${imagen}" alt="Imagen del parque" style="width:200px; border-radius:8px; margin-top:5px;">
+              </div>
+            `;
 
-    const outerRing = getOuterRingCoordinates(barrioGeoJSON);
-    if (!outerRing) {
-        console.error("❌ No se pudo extraer el anillo exterior del polígono.");
-        map.fitBounds(capaBarrio.getBounds());
-        return;
-    }
-    const polyString = outerRing.map(([lon, lat]) => `${lat} ${lon}`).join(' ');
+            // Popup solo para el parque
+            layer.bindPopup(contenidoPopup);
 
-    // 2️⃣ Consulta Overpass
-    const query = `
-        [out:json][timeout:25];
-        (
-            node["leisure"="park"](poly:"${polyString}");
-            way["leisure"="park"](poly:"${polyString}");
-            relation["leisure"="park"](poly:"${polyString}");
-        );
-        out geom;`;
+            // 👉 Evento: al hacer clic en el polígono
+            layer.on("click", () => {
+              const centro = layer.getBounds().getCenter();
+              infoBox.innerHTML = `
+                <h3>${nombre}</h3>
+                <p><b>Barrio:</b> ${barrio}</p>
+                <p><b>Dirección:</b> ${direccion}</p>
+                <p><b>Localidad:</b> ${localidad}</p>
+                <p><b>Coordenadas:</b><br>
+                   <b>Latitud:</b> ${centro.lat.toFixed(6)}<br>
+                   <b>Longitud:</b> ${centro.lng.toFixed(6)}
+                </p>
+                <img src="${imagen}" alt="Imagen del parque" style="width:100%; border-radius:8px; margin-top:5px;">
+              `;
+            });
 
-    let data = await safeFetchJSON(overpassURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-        body: new URLSearchParams({ data: query })
-    });
+            // Agregar ícono en el centro del polígono
+            if (addMarker && feature.geometry.type.includes("Polygon")) {
+              let centro = layer.getBounds().getCenter();
+              centro = L.latLng(centro.lat, centro.lng + 0.0005); // mover un poco a la derecha
 
-    const parquesLayer = L.featureGroup().addTo(map); // corregido para usar featureGroup
-
-    if (data && data.elements) {
-        function nombreDe(el) {
-            return (el.tags && (el.tags.name || el.tags['name:es'] || el.tags['name:en'])) || 'Parque';
-        }
-
-        data.elements.forEach(el => {
-            if (el.type === 'node') {
-                L.circleMarker([el.lat, el.lon], {
-                    radius: 6,
-                    color: '#2e7d32',
-                    fillColor: '#2e7d32',
-                    fillOpacity: 0.9
-                }).bindPopup(`<b>${nombreDe(el)}</b>`).addTo(parquesLayer);
-            } else if (el.geometry) {
-                const coords = el.geometry.map(g => [g.lat, g.lon]);
-                const isClosed = coords.length > 2 &&
-                                 coords[0][0] === coords[coords.length - 1][0] &&
-                                 coords[0][1] === coords[coords.length - 1][1];
-                const shape = isClosed
-                    ? L.polygon(coords, { color: '#2e7d32', weight: 2, fillOpacity: 0.45 })
-                    : L.polyline(coords, { color: '#2e7d32', weight: 3 });
-                shape.bindPopup(`<b>${nombreDe(el)}</b>`).addTo(parquesLayer);
+              L.marker(centro, { icon: iconoParque })
+                .bindPopup(contenidoPopup)
+                .addTo(map);
             }
-        });
-    } else {
-        console.warn("ℹ️ No se encontraron parques en Overpass o la consulta falló.");
-    }
+          }
+        }
+      }).addTo(map);
 
-    // 3️⃣ Centrar vista
-    const parquesBounds = parquesLayer.getBounds();
-    if (parquesBounds.isValid()) {
-        map.fitBounds(parquesBounds.pad(0.05));
-    } else {
-        map.fitBounds(capaBarrio.getBounds().pad(0.05));
+      return capa;
+    } catch (err) {
+      console.error(`❌ Error cargando ${url}:`, err);
+      return null;
     }
+  }
+
+  // 1️⃣ Barrio (sin popup)
+  const capaBarrio = await cargarGeoJSON(
+    'capas/Sector_Villa_Anny_II.json',
+    { color: 'blue', weight: 2, fillOpacity: 0 }
+  );
+
+  // 2️⃣ Parque (con popup + panel derecho)
+  const capaParque = await cargarGeoJSON(
+    'capas/Parque.json',
+    { color: 'green', weight: 2, fillOpacity: 0.5 },
+    true,   // activar popup/info
+    'name', // propiedad del nombre
+    true    // añadir ícono
+  );
+
+  // 3️⃣ Centrar mapa
+  if (capaParque && capaParque.getBounds().isValid()) {
+    map.fitBounds(capaParque.getBounds().pad(0.05));
+  } else if (capaBarrio && capaBarrio.getBounds().isValid()) {
+    map.fitBounds(capaBarrio.getBounds().pad(0.05));
+  }
+})();
+
+// =======================
+// MAPA HUMEDAL
+// =======================
+(async () => {
+  const mapHumedal = L.map('map-humedal');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(mapHumedal);
+
+  const infoBoxHumedal = document.getElementById("info-humedal");
+
+  // Ícono para el humedal
+  const iconoHumedal = L.icon({
+    iconUrl: 'imagenes/humedal.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+
+  // Título fijo en la parte inferior izquierda del mapa
+  const titulohumedal = L.control({ position: 'bottomleft' });
+  titulohumedal.onAdd = function () {
+    const div = L.DomUtil.create('div', 'titulo-mapa');
+    div.innerHTML = "<h3>Humedales en Villa Anny II</h3>";
+    return div;
+  };
+  titulohumedal.addTo(mapHumedal);
+
+  try {
+    // =====================
+    // Cargar Barrio
+    // =====================
+    const resBarrio = await fetch('capas/Sector_Villa_Anny_II.json');
+    if (!resBarrio.ok) throw new Error(`Error HTTP ${resBarrio.status}`);
+    const dataBarrio = await resBarrio.json();
+
+    const capaBarrio = L.geoJSON(dataBarrio, {
+      style: { color: 'red', weight: 2, fillOpacity: 0 }, // solo contorno      
+    }).addTo(mapHumedal);
+
+    // =====================
+    // Cargar Humedal
+    // =====================
+    const resHumedal = await fetch('capas/Humedal.json');
+    if (!resHumedal.ok) throw new Error(`Error HTTP ${resHumedal.status}`);
+    const dataHumedal = await resHumedal.json();
+
+    const capaHumedal = L.geoJSON(dataHumedal, {
+      style: { color: 'blue', weight: 2, fillOpacity: 0.4 },
+      onEachFeature: (feature, layer) => {
+        const nombre = feature.properties?.name || "Humedal sin nombre";
+        const barrio = "Villa Anny II";
+        const direccion = "TV 77 G N° 71 D - 03";
+        const localidad = "Bosa";
+        const imagen = "imagenes/humedal.jpg";
+
+        const contenidoPopup = `
+          <div style="text-align:center">
+            <h3>${nombre}</h3>
+            <p><b>Barrio:</b> ${barrio}</p>
+            <img src="${imagen}" alt="Imagen del humedal" style="width:200px; border-radius:8px; margin-top:5px;">
+          </div>
+        `;
+
+        layer.bindPopup(contenidoPopup);
+
+        // Evento clic: actualizar panel derecho
+        layer.on("click", () => {
+          const centro = layer.getBounds().getCenter();
+          infoBoxHumedal.innerHTML = `
+            <h3>${nombre}</h3>
+            <p><b>Barrio:</b> ${barrio}</p>
+            <p><b>Dirección:</b> ${direccion}</p>
+            <p><b>Localidad:</b> ${localidad}</p>
+            <p><b>Coordenadas:</b><br>
+               <b>Latitud:</b> ${centro.lat.toFixed(6)}<br>
+               <b>Longitud:</b> ${centro.lng.toFixed(6)}
+            </p>
+            <img src="${imagen}" alt="Imagen del humedal" style="width:100%; border-radius:8px; margin-top:5px;">
+          `;
+        });
+
+        // Ícono en el centro del polígono
+        if (feature.geometry.type.includes("Polygon")) {
+          let centro = layer.getBounds().getCenter();
+          L.marker(centro, { icon: iconoHumedal })
+            .bindPopup(contenidoPopup)
+            .addTo(mapHumedal);
+        }
+      }
+    }).addTo(mapHumedal);
+
+    // Ajustar vista para mostrar barrio y humedal
+    const bounds = capaBarrio.getBounds().extend(capaHumedal.getBounds());
+    if (bounds.isValid()) {
+      mapHumedal.fitBounds(bounds.pad(0.05));
+    }
+  } catch (err) {
+    console.error("❌ Error cargando datos en mapa humedal:", err);
+  }
 })();

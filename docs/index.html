@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Villa Anny II</title>
-
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
-  <!-- Estilos del sitio -->
-  <link rel="stylesheet" href="estilos.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Villa Anny II</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
   <div class="pagina">
@@ -20,30 +16,59 @@
       <h1 class="site-title">Villa Anny II</h1>
     </header>
 
-    <nav class="main-nav">
-      <a href="equipamientos.html">Equipamientos</a>
-      <a href="#">Movilidad</a>
-      <a href="#">Problemáticas</a>
-      <a href="acercade.html">Acerca de</a>
+    <nav>
+        <a href="equipamientos.html">Equipamientos</a>
+        <a href="#">Movilidad</a>
+        <a href="#">Problemáticas</a>
+        <a href="acercade.html">Acerca de</a>
     </nav>
 
-    <section class="image-container">
-      <img src="img_1.JPG" alt="Imagen Barrio" />
-      <div class="image-title">Villa Anny II</div>
-    </section>
+    <main>
+        <h2>Barrio Villa Anny II</h2>
+        <p>Villa Anny II es un barrio ubicado en la localidad de Bosa, al suroccidente de Bogotá.</p>
+    </main>
 
-    <section class="map-container">
-      <div id="map"></div>
-    </section>
+    <div class="image-container">
+        <img src="imagenes/barrio.JPG" alt="Imagen Barrio">
+        <div class="image-title">Villa Anny II</div>
+    </div>
+
+    <main>
+        <h2>Ubicación</h2>
+    </main>
+
+    <div id="map"></div>
 
     <footer class="site-footer">
       &copy; 2025 Mi Barrio. Todos los derechos reservados.
     </footer>
-  </div>
 
-  <!-- Leaflet -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <!-- JS -->
-  <script src="js/indexMapa.js"></script>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    
+    // Crear mapa con zoom fijo
+    var map = L.map('map').setView([4.6500, -74.1000], 12); 
+    // ↑ Cambia lat/lon por el centro exacto del barrio
+
+    // Capa base
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Cargar polígono desde carpeta capas
+    fetch('capas/Sector_Villa_Anny_II.json')
+        .then(response => response.json())
+        .then(data => {
+            L.geoJSON(data, {
+                style: {
+                    color: 'blue',
+                    weight: 2,
+                    fillOpacity: 0.4
+                }
+            }).addTo(map);
+        });
+</script>
 </body>
 </html>

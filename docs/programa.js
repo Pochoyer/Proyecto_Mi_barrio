@@ -8,7 +8,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(mapa);
 
 // Cargar polígono desde archivo GeoJSON
-fetch('capas/Villa_Anny_II.geojson')
+fetch('capas/Sector_Villa_Anny_II.json')
     .then(response => response.json())
     .then(data => {
         const capaGeoJSON = L.geoJSON(data, {

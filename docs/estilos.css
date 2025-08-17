@@ -1,104 +1,105 @@
-/* ====== Base ====== */
-*,
-*::before,
-*::after { box-sizing: border-box; }
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: #ccc;
+    font-family: Arial, sans-serif;
+}
+.pagina {
+    max-width: 1200px; /* Ancho máximo de la página */
+    margin: auto;
+    border: 5px solid #000; /* Marco negro */
+    background-color: white;
+    box-sizing: border-box;
+}
+header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f8f8;
+    position: relative; /* Contenedor de referencia para el título */
+}
+header img {
+    height: 60px;
+}
+header h1 {
+    position: absolute; /* Posicionamiento absoluto */
+    left: 50%; /* Lo mueve al centro */
+    transform: translateX(-50%); /* Ajuste fino para centrado exacto */
+    font-size: 1.8em;
+    margin: 0;
+    color: #333;
+}
+nav {
+    display: flex;
+    justify-content: center;
+    background-color: #e0e0e0;
+    padding: 10px 0;
+}
+nav a {
+    margin: 0 20px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+    font-size: 18px;
+}
+.image-container {
+    position: relative;
+    text-align: center;
+    margin-bottom: 20px; /* Espacio antes del mapa */
+}
+.image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+.image-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
 
-html, body { height: 100%; }
+    padding: 10px 20px;
+    font-size: 80px;
+    border-radius: 8px;
 
-:root{
-  --c-bg: #f9f9f9;
-  --c-surface: #fff;
-  --c-muted: #f5f5f5;
-  --c-text: #222;
-  --c-border: #ddd;
-  --radius: 8px;
-  --fs-title: clamp(24px, 8vw, 80px);
+}
+#map {
+    width: 100%;
+    height: 500px; /* Tamaño del mapa */
+}
+footer {
+    background: #222;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px; /* Espacio antes del pie de página */    
+}
+/* Centrar el título en la parte superior del mapa */
+.leaflet-top .titulo-mapa {
+    left: 50%;
+    transform: translateX(-50%);
+    position: relative;
 }
 
-body{
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: var(--c-bg);
-  color: var(--c-text);
-  line-height: 1.45;
+/* Estilo del título */
+.titulo-mapa {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: darkgreen;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    margin: 5px;
 }
-
-img{ max-width: 100%; display:block; height:auto; }
-
-/* ====== Layout ====== */
-.pagina{
-  max-width: 1200px;
-  margin: 0 auto;
-  background: var(--c-surface);
-}
-
-.site-header{
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
-  background: var(--c-muted);
-  border-bottom: 1px solid var(--c-border);
-}
-
-.site-header .logo img{
-  height: 60px; width: auto;
-}
-
-.site-title{
-  margin: 0;
-  font-size: 1.8rem;
-  color: #333;
-}
-
-.main-nav{
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding: 10px 0;
-  background-color: #e0e0e0;
-}
-.main-nav a{
-  text-decoration: none;
-  font-weight: 700;
-  color: #333;
-  font-size: 18px;
-}
-
-/* ====== Componentes comunes ====== */
-.image-container{
-  position: relative;
-  text-align: center;
-  margin-bottom: 20px;
-}
-.image-title{
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: rgba(0,0,0,.5);
-  color: #fff;
-  padding: 10px;
-  font-size: var(--fs-title);
-  border-radius: var(--radius);
-  line-height: 1.1;
-}
-
-.map-container{
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-#map{
-  width: 90%;
-  height: 500px;
-  border: 2px solid #ccc;
-  border-radius: var(--radius);
-}
-
-.site-footer{
-  background: #222;
-  color: #fff;
-  text-align: center;
-  padding: 10px 0;
-  margin-top: 20px;
+.imagen-acerca {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 8px;
+    margin: 10px auto;
+    display: block;
 }
