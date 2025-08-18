@@ -1,88 +1,92 @@
+// docs/catastro3d.js
+
 // --- Configuración ---
 const GEOJSON_URL = "capas/Villa_Anny_II.geojson";
 const METERS_PER_FLOOR = 3;
 
-// Posibles nombres del campo "pisos" en tu GeoJSON.
-// Si sabes el nombre exacto, ponlo primero (o deja uno solo).
+// Claves posibles del número de pisos (ajusta si sabes el nombre exacto)
 const FLOOR_KEYS = [
   "pisos", "Pisos", "NUM_PISOS", "N_PISOS", "num_pisos", "n_pisos", "pisos_totales"
 ];
 
-// --- Inicialización de Cesium ---
+// --- Viewer: terreno mundial + satélite ArcGIS ---
 const viewer = new Cesium.Viewer("cesiumContainer", {
-  baseLayerPicker: false,
-  geocoder: false,
-  homeButton: false,
-  navigationHelpButton: false,
-  sceneModePicker: true,
+  terrain: Cesium.Terrain.fromWorldTerrain(),
+  baseLayer: Cesium.ImageryLayer.fromProviderAsync(
+    Cesium.ArcGisMapServerImageryProvider.fromBasemapType(
+      Cesium.ArcGisBaseMapType.SATELLITE
+    )
+  ),
   timeline: false,
   animation: false,
-  terrainProvider: new Cesium.EllipsoidTerrainProvider(),
-  imageryProvider: new Cesium.OpenStreetMapImageryProvider({
-    url: "https://a.tile.openstreetmap.org/"
-  })
+  sceneModePicker: true,
+  navigationHelpButton: false,
+  geocoder: false,
+  homeButton: false,
+  shadows: true
 });
+viewer.scene.globe.depthTestAgainstTerrain = true;
+viewer.scene.backgroundColor = Cesium.Color.fromCssColorString("#f0f0f0");
 
-viewer.scene.globe.enableLighting = false; // sin sombras globales por ahora
-
-// Helper: obtiene # de pisos desde properties (intenta varias claves)
-function getFloorsFromProps(props) {
-  if (!props) return 1;
+// Helper: intenta leer "pisos" desde distintas claves
+function getFloorsFromPropsBag(propsBag, now) {
+  const p = propsBag && typeof propsBag.getValue === "function"
+    ? (propsBag.getValue(now) || {})
+    : (propsBag || {});
   for (const k of FLOOR_KEYS) {
-    const v = props[k];
-    if (v !== undefined && v !== null) {
-      const n = Number(v);
-      if (!Number.isNaN(n) && n > 0) return n;
-    }
+    if (p[k] != null && !Number.isNaN(Number(p[k]))) return Number(p[k]);
   }
-  return 1; // por defecto 1 piso si no hay dato
+  return null;
 }
 
-// Carga el GeoJSON y aplica extrusión
+// Carga y extruye
 (async () => {
   try {
-    const dataSource = await Cesium.GeoJsonDataSource.load(GEOJSON_URL, {
-      clampToGround: false
-    });
-    viewer.dataSources.add(dataSource);
+    const ds = await Cesium.GeoJsonDataSource.load(GEOJSON_URL /* sin clampToGround si vas a extruir */);
+    viewer.dataSources.add(ds);
 
     const now = Cesium.JulianDate.now();
-    const entities = dataSource.entities.values;
 
-    for (const e of entities) {
-      if (!e.polygon) continue;
+    for (const e of ds.entities.values) {
+      const pol = e.polygon;
+      if (!pol) continue;
 
-      // Obtiene properties como objeto plano
-      let props = {};
-      if (e.properties) {
-        props = typeof e.properties.getValue === "function"
-          ? e.properties.getValue(now) || {}
-          : e.properties; // en algunas versiones ya es plano
-      }
+      const floors = getFloorsFromPropsBag(e.properties, now);
+      // También aceptamos un campo "altura" directo si existe
+      const p = e.properties && e.properties.getValue ? (e.properties.getValue(now) || {}) : (e.properties || {});
+      const alturaDirecta = (p.altura != null && !Number.isNaN(Number(p.altura))) ? Number(p.altura) : null;
 
-      const floors = getFloorsFromProps(props);
-      const extruded = floors * METERS_PER_FLOOR;
+      const extruded = alturaDirecta != null
+        ? alturaDirecta
+        : (Math.max(1, floors ?? 1) * METERS_PER_FLOOR);
 
-      // Estilo de extrusión
-      e.polygon.height = 0.0;
-      e.polygon.extrudedHeight = extruded;
-      e.polygon.material = Cesium.Color.fromCssColorString("#3cb371").withAlpha(0.65);
-      e.polygon.outline = true;
-      e.polygon.outlineColor = Cesium.Color.BLACK;
+      // Extrusión relativa al terreno (sale desde el suelo real)
+      pol.heightReference = Cesium.HeightReference.CLAMP_TO_GROUND;
+      pol.extrudedHeight = extruded;
+      pol.extrudedHeightReference = Cesium.HeightReference.RELATIVE_TO_GROUND;
 
-      // Tooltip sencillo al click
+      // Estilo
+      pol.material = Cesium.Color.fromCssColorString("#3cb371").withAlpha(0.80);
+      pol.outline = true;
+      pol.outlineColor = Cesium.Color.BLACK;
+
+      // Tooltip
       e.description = `
         <table class="cesium-infoBox-defaultTable">
-          <tr><th>Pisos</th><td>${floors}</td></tr>
+          <tr><th>Pisos</th><td>${floors ?? "-"}</td></tr>
           <tr><th>Altura</th><td>${extruded.toFixed(2)} m</td></tr>
         </table>
       `;
     }
 
-    // Enfoca vista a la capa
-    await viewer.flyTo(dataSource, { duration: 1.8 });
+    // Enfocar a la capa
+    await viewer.flyTo(ds, { duration: 1.6 });
+
+    // (Opcional) Edificios OSM recortados al barrio
+    // const osm = await Cesium.createOsmBuildingsAsync();
+    // viewer.scene.primitives.add(osm);
   } catch (err) {
     console.error("Error cargando GeoJSON:", err);
-    alert("No se pudo cargar el GeoJSON. Ver consola para detalles.");
+    alert("No se pudo cargar el GeoJSON. Revisa la consola.");
   }
 })();
