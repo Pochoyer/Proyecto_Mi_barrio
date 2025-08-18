@@ -37,7 +37,7 @@
             const barrio = "Villa Anny II";
             const direccion = "TV 77 G N° 71 D - 03";
             const localidad = "Bosa";
-            const imagen = "imagenes/Parque_tibanica.png"; // 📌 foto real del parque
+            const imagen = "imagenes/parque.png"; // 📌 foto real del parque
 
             const contenidoPopup = `
               <div style="text-align:center">
