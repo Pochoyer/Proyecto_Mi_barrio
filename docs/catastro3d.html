@@ -5,161 +5,60 @@
   <title>Catastro 3D | Proyecto Mi Barrio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Estilos del sitio -->
+  <!-- Estilos globales -->
   <link rel="stylesheet" href="estilos.css" />
-  <!-- Estilos específicos para Catastro 3D (namespaced) -->
+  <!-- Estilos específicos de esta sección -->
   <link rel="stylesheet" href="catastro3d.css" />
 
-  <!-- Cesium (1.132) -->
+  <!-- Cesium 1.132 -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.132/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.132/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+
+  <script>
+    /* Pega aquí tu token Ion si usas terreno/imagery de Ion */
+    // Cesium.Ion.defaultAccessToken = "TU_TOKEN";
+  </script>
 </head>
 <body>
-  <!-- NAVBAR -->
-  <nav class="navbar">
-    <ul>
-      <li><a href="index.html">Inicio</a></li>
-      <li><a href="equipamientos.html">Equipamientos</a></li>
-      <li><a href="problematicas.html">Problemáticas</a></li>
-      <li><a href="acercade.html">Acerca de</a></li>
-      <li><a class="active" href="catastro3d.html">Catastro 3D</a></li>
-    </ul>
-  </nav>
+  <div class="pagina"><!-- 👈 igual que las demás páginas -->
+    <!-- HEADER igual que index.html -->
+    <header>
+      <a href="index.html"><img src="imagenes/Logo.png" alt="Logo"></a>
+      <h1>Catastro 3D: Villa Anny II</h1>
+    </header>
 
-  <header class="page-header">
-    <h1>Catastro 3D</h1>
-    <p>Extrusión de polígonos: <strong>3 m por piso</strong> según campo de pisos en el GeoJSON.</p>
-  </header>
+    <!-- NAV igual que index.html (marca activo) -->
+    <nav class="navbar">
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="equipamientos.html">Equipamientos</a></li>
+        <li><a href="movilidad.html">Movilidad</a></li>
+        <li><a href="problematicas.html">Problemáticas</a></li>
+        <li><a href="acercade.html">Acerca de</a></li>
+        <li><a class="active" href="catastro3d.html">Catastro 3D</a></li>
+      </ul>
+    </nav>
 
-  <main class="catastro3d">
-    <div class="toolbar">
-      <b>Fuente:</b> capas/Villa_Anny_II.geojson • <b>Altura por piso:</b> 3 m
-    </div>
-    <div id="cesiumContainer"></div>
-  </main>
+    <!-- CONTENIDO -->
+    <main class="catastro3d">
+      <section class="page-header">
+        <h2>Catastro 3D</h2>
+        <p>Extrusión de polígonos: <strong>3 m por piso</strong> según el GeoJSON.</p>
+      </section>
 
-  <!-- Lógica Cesium -->
-  <script type="module">
-    // ⚠️ Pega aquí tu token de Cesium Ion (del snippet que probaste)
-    Cesium.Ion.defaultAccessToken = 'TU_TOKEN_ION_AQUI';
+      <div class="toolbar">
+        <b>Fuente:</b> capas/Villa_Anny_II.geojson • <b>Altura por piso:</b> 3 m
+      </div>
 
-    // Viewer con terreno mundial y satélite ArcGIS
-    const viewer = new Cesium.Viewer("cesiumContainer", {
-      terrain: Cesium.Terrain.fromWorldTerrain(),
-      baseLayer: Cesium.ImageryLayer.fromProviderAsync(
-        Cesium.ArcGisMapServerImageryProvider.fromBasemapType(
-          Cesium.ArcGisBaseMapType.SATELLITE
-        )
-      ),
-      timeline: false,
-      animation: false,
-      shadows: true,
-      sceneModePicker: true,
-      navigationHelpButton: false,
-      geocoder: false,
-      homeButton: false
-    });
-    viewer.scene.globe.depthTestAgainstTerrain = true;
+      <div id="cesiumContainer"></div>
+    </main>
 
-    // Archivo del barrio / predios (EPSG:4326)
-    const GEOJSON = "capas/Villa_Anny_II.geojson";
-    const METERS_PER_FLOOR = 3;
-    const FLOOR_KEYS = ["pisos","Pisos","NUM_PISOS","N_PISOS","num_pisos","n_pisos","pisos_totales"];
+    <footer>
+      <small>&copy; 2025 Proyecto Mi Barrio — Villa Anny II</small>
+    </footer>
+  </div>
 
-    // 1) Capa del barrio para ubicar/volar (sin extrusión)
-    const barrio = await Cesium.GeoJsonDataSource.load(GEOJSON, { clampToGround: true });
-    viewer.dataSources.add(barrio);
-
-    // Estilo simple del límite del barrio
-    for (const e of barrio.entities.values) {
-      if (!e.polygon) continue;
-      e.polygon.material = Cesium.Color.fromCssColorString("#1e88e5").withAlpha(0.18);
-      e.polygon.outline = true;
-      e.polygon.outlineColor = Cesium.Color.fromCssColorString("#0d47a1").withAlpha(0.7);
-    }
-    await viewer.flyTo(barrio, { duration: 1.6 });
-
-    // 2) Misma capa pero con extrusión por pisos/altura
-    const predios = await Cesium.GeoJsonDataSource.load(GEOJSON);
-    viewer.dataSources.add(predios);
-
-    // Helper para pisos
-    function getFloors(props) {
-      if (!props) return null;
-      for (const k of FLOOR_KEYS) {
-        const v = props[k]?.getValue?.() ?? props[k];
-        const n = Number(v);
-        if (!Number.isNaN(n) && n > 0) return n;
-      }
-      return null;
-    }
-
-    for (const e of predios.entities.values) {
-      const pol = e.polygon;
-      if (!pol) continue;
-
-      const props = e.properties || {};
-      const alturaProp = props.altura?.getValue?.();
-      const pisosProp  = getFloors(props);
-      const altura = !Number.isNaN(+alturaProp) && alturaProp != null
-        ? +alturaProp
-        : (pisosProp ? pisosProp * METERS_PER_FLOOR : 6); // fallback 6 m
-
-      // Material y extrusión
-      pol.material = Cesium.Color.fromCssColorString("#7a8a50").withAlpha(0.95);
-      pol.outline = true;
-      pol.outlineColor = Cesium.Color.BLACK;
-
-      // Relativo al terreno (eleva desde el suelo)
-      pol.heightReference = Cesium.HeightReference.CLAMP_TO_GROUND;
-      pol.extrudedHeight = altura;
-      pol.extrudedHeightReference = Cesium.HeightReference.RELATIVE_TO_GROUND;
-
-      // Descripción emergente
-      e.description = `
-        <table class="cesium-infoBox-defaultTable">
-          <tr><th>Pisos</th><td>${pisosProp ?? "-"}</td></tr>
-          <tr><th>Altura</th><td>${altura.toFixed(2)} m</td></tr>
-        </table>
-      `;
-    }
-
-    // 3) (Opcional) Edificios OSM recortados a la zona del barrio
-    try {
-      const osm = await Cesium.createOsmBuildingsAsync();
-      viewer.scene.primitives.add(osm);
-
-      const poly = barrio.entities.values.find(e => e.polygon)?.polygon;
-      if (poly?.hierarchy) {
-        const positions = poly.hierarchy.getValue().positions;
-        const toDeg = (c) => {
-          const carto = Cesium.Ellipsoid.WGS84.cartesianToCartographic(c);
-          return { lon: Cesium.Math.toDegrees(carto.longitude), lat: Cesium.Math.toDegrees(carto.latitude) };
-        };
-        let west=180, south=90, east=-180, north=-90;
-        positions.map(toDeg).forEach(({lon,lat}) => {
-          west = Math.min(west, lon);
-          east = Math.max(east, lon);
-          south= Math.min(south,lat);
-          north= Math.max(north,lat);
-        });
-        const rect = Cesium.Rectangle.fromDegrees(west, south, east, north);
-        osm.clippingPlanes = Cesium.ClippingPlaneCollection.fromBoundingRectangle(rect, {
-          unionClippingRegions: true, edgeWidth: 0.0
-        });
-      }
-    } catch (err) {
-      console.warn("OSM Buildings no disponible:", err);
-    }
-
-    // 4) Cámara sugerida manual (si quieres fijarla)
-    // viewer.camera.flyTo({
-    //   destination: Cesium.Cartesian3.fromDegrees(-74.17653, 4.59027, 2600),
-    //   orientation: { heading: 0, pitch: Cesium.Math.toRadians(-25) }
-    // });
-  </script>
-
-  <!-- (Si prefieres tener la lógica aparte) -->
-  <!-- <script src="catastro3d.js"></script> -->
+  <!-- Tu lógica (asegúrate que usa el contenedor "cesiumContainer") -->
+  <script src="catastro3d.js"></script>
 </body>
 </html>
