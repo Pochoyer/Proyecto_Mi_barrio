@@ -1,0 +1,20 @@
+.catastro3d{
+  --cat-bg:#f9f9f9; --cat-surface:#fff; --cat-border:#ddd; --cat-shadow:0 2px 10px rgba(0,0,0,.1);
+  background:var(--cat-bg);
+}
+.catastro3d .toolbar{
+  position:relative; z-index:10; display:inline-block; margin:12px 16px 0;
+  background:var(--cat-surface); padding:6px 10px; border:1px solid var(--cat-border);
+  border-radius:8px; box-shadow:var(--cat-shadow); font-size:14px;
+}
+.catastro3d #cesiumContainer{
+  width:100%; height:620px; min-height:520px; margin:10px 16px 16px;
+  border:1px solid var(--cat-border); border-radius:8px; box-shadow:var(--cat-shadow);
+  background:#f0f0f0; overflow:hidden;
+}
+.catastro3d .cesium-viewer-toolbar{ right:18px; top:18px; }
+.catastro3d .cesium-viewer-bottom{ bottom:6px; left:6px; right:6px; }
+@media (max-width:768px){
+  .catastro3d #cesiumContainer{ height:70vh; margin:8px; }
+  .catastro3d .toolbar{ margin:8px; }
+}
