@@ -1,0 +1,12 @@
+[
+  {
+    "id": "c1",
+    "nombre": "Cicloruta 1",
+    "tipo": "segregada",
+    "sentido": "doble",
+    "coords": [
+      [4.6165, -74.103],
+      [4.6178, -74.097]
+    ]
+  }
+]
