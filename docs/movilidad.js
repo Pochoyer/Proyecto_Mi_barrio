@@ -12,7 +12,6 @@ map.createPane('paraderosPane'); map.getPane('paraderosPane').style.zIndex = 430
 
 // Datos (arrays crudos)
 let viasData = [];
-let cicloData = [];
 let paraderosData = [];
 
 // Capas (LayerGroup) que renderizamos/reemplazamos al filtrar
