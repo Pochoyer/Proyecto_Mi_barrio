@@ -5,27 +5,30 @@
   <title>Recorrido 3D | Proyecto Mi Barrio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Estilos globales -->
+  <!-- Estilos globales del sitio -->
   <link rel="stylesheet" href="estilos.css" />
-  <!-- Estilos específicos -->
+  <!-- Estilos específicos de esta sección -->
   <link rel="stylesheet" href="recorrido3d.css" />
 
   <!-- Cesium 1.132 -->
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.132/Build/Cesium/Cesium.js"></script>
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.132/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.132/Build/Cesium/Cesium.js"></script>
 
+  <!-- Token de Cesium Ion (reemplaza por el tuyo) -->
   <script>
-    /* (Opcional) Token Ion si usas terreno/imagery de Ion */
     Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZjFiZTg0Mi1kMGE5LTQxZTItOTQ2NC04MzFjODE4Mjg2YzMiLCJpZCI6MzMxMzcyLCJpYXQiOjE3NTUwNDI2MDF9.bp9w8UGT5gU4rtUWaOjeTWJjjj1asVfDnexcz2e2G34";
   </script>
 </head>
 <body>
   <div class="pagina">
+    <!-- Header -->
     <header>
-      <a href="index.html"><img src="imagenes/logo.png" alt="Logo" /></a>
+      <!-- Ajusta el nombre del archivo del logo si es distinto (Logo.png / logo.png) -->
+      <a href="index.html"><img src="imagenes/Logo.png" alt="Logo" /></a>
       <h1>Villa Anny II</h1>
     </header>
 
+    <!-- Navbar (marca activo Recorrido 3D) -->
     <nav class="navbar">
       <ul>
         <li><a href="index.html">Inicio</a></li>
@@ -38,12 +41,14 @@
       </ul>
     </nav>
 
+    <!-- Contenido -->
     <main class="recorrido3d">
       <section class="page-header">
         <h2>Recorrido 3D</h2>
         <p>Vuelo de cámara siguiendo la ruta del barrio sobre el Catastro 3D.</p>
       </section>
 
+      <!-- Barra de controles -->
       <div class="toolbar">
         <div class="controls">
           <button id="btnPlay" title="Reproducir/Pausar">⏯️</button>
@@ -59,6 +64,7 @@
         </div>
       </div>
 
+      <!-- Contenedor de Cesium -->
       <div id="cesiumContainer"></div>
     </main>
 
@@ -67,6 +73,7 @@
     </footer>
   </div>
 
+  <!-- Lógica del recorrido -->
   <script src="recorrido3d.js"></script>
 </body>
 </html>
