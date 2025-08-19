@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Movilidad - Villa Anny II</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link rel="stylesheet" href="estilos.css"/>
+  <style>
+    .layout { display:flex; gap:12px; }
+    #map-mov { flex:3; height:72vh; border:2px solid #ccc; }
+    #panel-mov { flex:1; border:2px solid #ccc; background:#fff; padding:10px; }
+    #panel-mov h3 { margin-top:0; }
+    .filtro { margin-bottom:10px; }
+    .leyenda { font-size:0.9rem; line-height:1.3; }
+    .badge { display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:middle; border:1px solid #999; }
+  </style>
+</head>
+<body>
+  <div class="pagina">
+    <header>
+      <a href="index.html"><img src="imagenes/Logo.png" alt="Logo"></a>
+      <h1>Movilidad: Villa Anny II</h1>
+    </header>
+
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="equipamientos.html">Equipamientos</a>
+      <a href="movilidad.html" class="active">Movilidad</a>
+      <a href="#">Problemáticas</a>
+      <a href="acerca_de.html">Acerca de</a>
+    </nav>
+
+    <main>
+      <h2>Vías y movilidad</h2>
+      <p>Mapa con Vías, Ciclorutas y Paraderos. Filtra por tipo, estado y velocidad máxima.</p>
+
+      <div class="layout" style="margin-bottom:16px;">
+        <div id="map-mov"></div>
+
+        <aside id="panel-mov">
+          <h3>Capas y filtros</h3>
+
+          <div class="filtro">
+            <strong>Capas</strong><br/>
+            <label><input type="checkbox" data-layer="vias" checked> Vías</label><br/>
+            <label><input type="checkbox" data-layer="ciclorutas" checked> Ciclorutas</label><br/>
+            <label><input type="checkbox" data-layer="paraderos" checked> Paraderos</label>
+          </div>
+
+          <div class="filtro">
+            <strong>Tipo de vía</strong><br/>
+            <select id="filtro-tipo">
+              <option value="">(Todas)</option>
+              <option value="primaria">Primaria</option>
+              <option value="secundaria">Secundaria</option>
+              <option value="terciaria">Terciaria</option>
+              <option value="local">Local</option>
+            </select>
+          </div>
+
+          <div class="filtro">
+            <strong>Estado</strong><br/>
+            <select id="filtro-estado">
+              <option value="">(Todos)</option>
+              <option value="existente">Existente</option>
+              <option value="proyectada">Proyectada</option>
+              <option value="en obra">En obra</option>
+            </select>
+          </div>
+
+          <div class="filtro">
+            <strong>Velocidad máx. (km/h)</strong><br/>
+            <input id="filtro-vel" type="range" min="10" max="90" step="10" value="90"/>
+            <span id="vel-out">≤ 90</span>
+          </div>
+
+          <hr/>
+          <div class="leyenda">
+            <div><span class="badge" style="background:#1f77b4"></span> Primaria</div>
+            <div><span class="badge" style="background:#2ca02c"></span> Secundaria</div>
+            <div><span class="badge" style="background:#ff7f0e"></span> Terciaria</div>
+            <div><span class="badge" style="background:#9467bd"></span> Local</div>
+            <div style="margin-top:6px;"><em>Línea discontinua = proyectada</em></div>
+          </div>
+
+          <hr/>
+          <h3>Información</h3>
+          <div id="info-mov">Pasa el cursor por una vía o haz clic en un elemento…</div>
+        </aside>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 Todos los derechos reservados</p>
+    </footer>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="movilidad.js" type="module"></script>
+</body>
+</html>
