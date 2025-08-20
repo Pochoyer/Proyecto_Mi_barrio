@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recorrido virtual con Cesium</title>
+
+  <!-- CesiumJS (ajusta la versión si lo prefieres) -->
+  <link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Widgets/widgets.css">
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.115/Build/Cesium/Cesium.js"></script>
+
+  <link rel="stylesheet" href="./recorrido.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Recorrido virtual — Cesium</h1>
+    
+    <div class="controls">
+      <nav class="navbar">
+      <ul>
+       <a id="home" href="./index.html" class="btn">Inicio</a>
+      </ul>
+    </nav>
+      <label class="control">
+        Velocidad (km/h)
+        <input id="speed" type="number" min="1" step="1" value="0">
+      </label>
+      
+
+      <label class="control inline">
+        <input id="followCam" type="checkbox" checked>
+        Seguir cámara
+      </label>
+
+      <button id="play" class="btn">▶ Iniciar</button>
+      <button id="pause" class="btn">⏸ Pausar</button>
+      <button id="reset" class="btn">⟲ Reiniciar</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <div id="cesiumContainer" class="viewer"></div>
+    <aside class="sidebar">
+      <p class="hint">
+       <h2>Pasos para iniciar el recorrido:</h2> 
+        1. Selecciona una <b>velocidad</b> y pulsa <b>Iniciar</b> para comenzar el recorrido.<br>
+        2. Puedes rotar la cámara con clic izquierdo, mover con derecho y zoom con la rueda.<br>
+        3. Marca “Seguir cámara” para que el dron sea rastreado automáticamente.<br>
+     
+      <br><h2>Detalle del recorrido</h2>
+      <div class="stat"><span>Longitud total:</span> <strong id="totalLength">—</strong></div>
+      <div class="stat"><span>Duración (a velocidad actual):</span> <strong id="totalTime">—</strong></div>   
+      </p>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    <small>© 2025 Todos los derechos reservados.</small>
+  </footer>
+
+  <script src="./recorrido.js"></script>
+</body>
+</html>
