@@ -29,18 +29,17 @@ header h1 {
   color: #222;
 }
 
-.navbar {
-  background: #e0e0e0;
-  padding: 8px 0;
-}
 .navbar ul {
-  list-style: none; margin: 0; padding: 0;
-  display: flex; justify-content: center; gap: 18px;
+  list-style: none;
+  display: flex;
+  gap: 32px;
+  margin: 0;
+  padding: 10px 0;
 }
-.navbar a {
-  text-decoration: none; color: #333; font-weight: 600;
-}
-.navbar a.active { color: #0369a1; text-decoration: underline; }
+.navbar li { margin: 0; }
+.navbar a { text-decoration: none; font-weight: bold; color: #333; font-size: 18px; }
+.navbar a:hover { color: #0a7d47; }
+.navbar a.active { background: #3cb371; color: #fff; padding: 6px 10px; border-radius: 8px; }
 
 .page-header {
   padding: 10px 14px;
