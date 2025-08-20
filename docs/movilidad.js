@@ -9,35 +9,23 @@ const imgWrap = document.getElementById('info-img-wrap');
 const infoImg = document.getElementById('info-img');
 
 function setInfo(html) { infoBox.innerHTML = html; }
-function showImage(src) {
-  if (!src) { imgWrap.style.display = 'none'; infoImg.removeAttribute('src'); return; }
-  infoImg.src = encodeURI(src);
-  imgWrap.style.display = 'block';
-}
+function showImage(src) { if (!src) { imgWrap.style.display = 'none'; infoImg.removeAttribute('src'); return; } infoImg.src = encodeURI(src); imgWrap.style.display = 'block'; }
 
 const PARADERO_IMG_DIR = 'imagenes/paraderos/';
 const PARADERO_DEFAULT_IMG = 'imagenes/paradero_info.png';
-const PARADERO_IMG_MAP = { 'Paradero 1': `${PARADERO_IMG_DIR}Paradero 1.jpg`, 'Paradero 2': `${PARADERO_IMG_DIR}Paradero 2.jpg` };
+const PARADERO_IMG_MAP = {
+  'Paradero 1': `${PARADERO_IMG_DIR}Paradero 1.jpg`,
+  'Paradero 2': `${PARADERO_IMG_DIR}Paradero 2.jpg`,
+  'Br. Villa Anny I y II': `${PARADERO_IMG_DIR}Paradero 1.jpg`,
+  'Br. Villa Anny I': `${PARADERO_IMG_DIR}Paradero 2.jpg`,
+  '488A09': `${PARADERO_IMG_DIR}Paradero 1.jpg`,
+  '168A09': `${PARADERO_IMG_DIR}Paradero 2.jpg`
+};
 
 async function loadJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(`No se pudo cargar ${url}`); return r.json(); }
 
-function tipoViaLargo(sigla) {
-  const s = (sigla || '').toString().toUpperCase();
-  if (s === 'DG') return 'Diagonal';
-  if (s === 'KR') return 'Carrera';
-  if (s === 'CL') return 'Calle';
-  if (s === 'TV') return 'Transversal';
-  return s || '-';
-}
-
-function colorPorSigla(sigla) {
-  const s = (sigla || '').toString().toUpperCase();
-  if (s === 'DG') return '#1f77b4';
-  if (s === 'KR') return '#2ca02c';
-  if (s === 'CL') return '#ff7f0e';
-  if (s === 'TV') return '#9467bd';
-  return '#7f7f7f';
-}
+function tipoViaLargo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'DG') return 'Diagonal'; if (s === 'KR') return 'Carrera'; if (s === 'CL') return 'Calle'; if (s === 'TV') return 'Transversal'; return s || '-'; }
+function colorPorSigla(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'DG') return '#1f77b4'; if (s === 'KR') return '#2ca02c'; if (s === 'CL') return '#ff7f0e'; if (s === 'TV') return '#9467bd'; return '#7f7f7f'; }
 
 function viaInfoHTML(p) {
   const etiqueta = p.MVIEtiquet ?? '-';
@@ -51,18 +39,20 @@ function viaInfoHTML(p) {
 
 function styleViasFeature(feat) {
   const p = feat.properties || {};
-  const weight = 4;
   const estado = (p.estado || '').toString().toLowerCase();
-  return { pane: 'viasPane', color: colorPorSigla(p.MVITipo), weight, opacity: 0.9, dashArray: estado === 'proyectada' ? '6,6' : null };
+  return { pane: 'viasPane', color: colorPorSigla(p.MVITipo), weight: 4, opacity: 0.9, dashArray: estado === 'proyectada' ? '6,6' : null };
 }
 
 function guessParaderoImg(p) {
   const direct = p.imagen || p.image || p.image_url || p.foto || p.FOTO || null;
   if (direct) return direct;
-  const byName = p.nombre_par || p.nombre || p.name;
-  if (byName && PARADERO_IMG_MAP[byName]) return PARADERO_IMG_MAP[byName];
-  const byCode = p.consec_par || p.cenefa || p.codigo || p.code;
-  if (byCode) return `${PARADERO_IMG_DIR}${byCode}.jpg`;
+  const nombre = p.nombre_par || p.nombre || p.name;
+  if (nombre && PARADERO_IMG_MAP[nombre]) return PARADERO_IMG_MAP[nombre];
+  const cenefa = p.cenefa;
+  if (cenefa && PARADERO_IMG_MAP[cenefa]) return PARADERO_IMG_MAP[cenefa];
+  if (cenefa) return `${PARADERO_IMG_DIR}${cenefa}.jpg`;
+  const consec = p.consec_par || p.codigo || p.code;
+  if (consec) return `${PARADERO_IMG_DIR}${consec}.jpg`;
   return PARADERO_DEFAULT_IMG;
 }
 
@@ -77,11 +67,7 @@ function paraderoInfoHTML(p) {
   return `<strong>${nombre}</strong><br>Vía: ${via}<br>Dirección: ${dir}<br>Cenefa: ${cenefa}<br>Código: ${consec}<br>Módulo: ${modulo}<br>Zona: ${zona}`;
 }
 
-function paraderoPopupHTML(p, imgUrl) {
-  const core = paraderoInfoHTML(p);
-  const img = imgUrl ? `<img src="${encodeURI(imgUrl)}" style="max-width:220px; display:block; margin-top:8px; border:1px solid #ddd; border-radius:6px;" alt="Paradero"/>` : '';
-  return `${core}${img}`;
-}
+function paraderoPopupHTML(p, imgUrl) { const core = paraderoInfoHTML(p); const img = imgUrl ? `<img src="${encodeURI(imgUrl)}" style="max-width:220px; display:block; margin-top:8px; border:1px solid #ddd; border-radius:6px;" alt="Paradero"/>` : ''; return `${core}${img}`; }
 
 let viasLayer, paraderosLayer;
 
