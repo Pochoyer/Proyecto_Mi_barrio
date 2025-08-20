@@ -36,7 +36,7 @@ const GEOJSON_URL = "capas/Const_Villa_Anny_II.json";
 const METERS_PER_FLOOR = 3;
 
 // Claves posibles en el GeoJSON para # de pisos (ajústalas si difiere)
-const FLOOR_KEYS = ["CONELEVACI"];
+const FLOOR_KEYS = ["CONELEVACI","pisos","Pisos","NUM_PISOS","N_PISOS","num_pisos","n_pisos","pisos_totales"];
 
 // Lee pisos desde la bolsa de propiedades (soporta propiedades estáticas o time-dynamic)
 function getFloorsFromPropsBag(propsBag, now) {
@@ -74,7 +74,7 @@ async function loadExtrudedBuildings() {
     pol.extrudedHeightReference = Cesium.HeightReference.RELATIVE_TO_GROUND;
 
     // Estilo del edificio
-    pol.material = Cesium.Color.fromCssColorString("#3cb371").withAlpha(0.80);
+    pol.material = Cesium.Color.fromCssColorString("#b66d0eff").withAlpha(0.80);
     pol.outline = true;
     pol.outlineColor = Cesium.Color.BLACK;
 
@@ -100,6 +100,19 @@ const pauseBtn = document.getElementById("pause");
 const resetBtn = document.getElementById("reset");
 const totalLengthEl = document.getElementById("totalLength");
 const totalTimeEl = document.getElementById("totalTime");
+// === UI extra (dibujo) ===
+const drawBtn = document.getElementById("draw");
+const finishBtn = document.getElementById("finishDraw");
+const cancelBtn = document.getElementById("cancelDraw");
+
+// === Estado para dibujo de recorrido ===
+let drawing = false;
+let drawHandler = null;
+let draftPositionsCart = [];     // Cartographic provisional (lon/lat/alt ~0)
+let draftPositions = [];         // Cartesian provisional (vista)
+let draftPolylineEntity = null;
+let draftPointEntities = [];
+
 
 // ===================== Estado =====================
 let viewer, routeEntity, moverEntity;
@@ -127,10 +140,13 @@ let startTime, stopTime, sampledPos;
     await initRoute();
 
     // 3.1) Cargar edificios extruidos del catastro 3D
-    await loadExtrudedBuildings();   // <= añade esto aquí
-    
+    await loadExtrudedBuildings();
+
     // 4) UI
     wireUI();
+    
+    // Permite hacer pick sobre terreno para obtener alturas
+    viewer.scene.globe.depthTestAgainstTerrain = true;
 
   } catch (err) {
     console.error("Error al iniciar:", err);
@@ -162,7 +178,7 @@ async function initRoute(){
     positions: routePositionsCartesian,
     width: 2,
     clampToGround: false,
-    material: Cesium.Color.YELLOW.withAlpha(0.0)   // transparente
+    material: Cesium.Color.YELLOW.withAlpha(1.0)   // transparente
   }
 });
 
@@ -300,7 +316,170 @@ function wireUI(){
   });
   speedInput?.addEventListener("change", rebuildWithSpeed);
   followCheckbox?.addEventListener("change", applyFollowCamera);
+  // DIBUJO: iniciar / usar / cancelar
+    drawBtn?.addEventListener("click", () => {
+    cancelDrawingRoute(); // limpia si había uno previo
+    startDrawingRoute();
+    });
+
+    finishBtn?.addEventListener("click", () => {
+    finishDrawingRoute().catch(err => {
+        console.error(err);
+        alert("No se pudo crear el recorrido desde el dibujo.");
+    });
+    });
+
+    cancelBtn?.addEventListener("click", () => {
+    cancelDrawingRoute();
+    });
+
 }
+// ============ DIBUJO DE RECORRIDO ============
+function startDrawingRoute(){
+  if (drawing) return;
+  drawing = true;
+
+  // Limpia borradores previos
+  cleanupDraft();
+
+  // Handler de entrada
+  drawHandler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+
+  // Click izquierdo: agrega un punto
+  drawHandler.setInputAction((click) => {
+    const cart = pickCartographic(click.position);
+    if (!cart) return;
+
+    draftPositionsCart.push(cart);
+    const cartesian = Cesium.Cartesian3.fromRadians(cart.longitude, cart.latitude, 0);
+    draftPositions.push(cartesian);
+
+    // Punto visual
+    const pt = viewer.entities.add({
+      position: cartesian,
+      point: { pixelSize: 8, color: Cesium.Color.ORANGE, outlineColor: Cesium.Color.BLACK, outlineWidth: 1 }
+    });
+    draftPointEntities.push(pt);
+
+    // Polilínea provisional
+    if (!draftPolylineEntity){
+      draftPolylineEntity = viewer.entities.add({
+        name: "Borrador recorrido",
+        polyline: { positions: new Cesium.CallbackProperty(()=>draftPositions, false), width: 3, material: Cesium.Color.ORANGE.withAlpha(0.7) }
+      });
+    }
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+  // Doble clic: finalizar como si pulsaras "Usar"
+  drawHandler.setInputAction(() => {
+    finishDrawingRoute().catch(console.error);
+  }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+  // Cursor: vista previa del último segmento
+  drawHandler.setInputAction((movement) => {
+    if (!draftPositions.length) return;
+    const cart = pickCartographic(movement.endPosition);
+    if (!cart) return;
+    const cartesian = Cesium.Cartesian3.fromRadians(cart.longitude, cart.latitude, 0);
+    // Actualiza la “cola” para preview (no fija hasta LEFT_CLICK)
+    if (draftPositions.length >= 2) {
+      draftPositions[draftPositions.length - 1] = cartesian;
+    } else {
+      draftPositions.push(cartesian);
+    }
+  }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+}
+
+async function finishDrawingRoute(){
+  if (!drawing) return;
+  if (draftPositionsCart.length < 2) { cancelDrawingRoute(); return; }
+
+  // Congela dibujo
+  stopDrawHandler();
+
+  // Asegura que la última posición sea “real” (quita la cola de preview si existe)
+  if (draftPositions.length > draftPositionsCart.length) {
+    draftPositions.pop();
+  }
+
+  // Muestra "pensando" corto
+  viewer.scene.requestRender();
+
+  // Muestra alturas reales
+  let sampled = await Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, draftPositionsCart);
+
+  // Convierte a cartesian con altura mínima de 10 m
+  routePositionsCartesian = sampled.map(c =>
+    Cesium.Cartesian3.fromRadians(c.longitude, c.latitude, Math.max(c.height||0, 10))
+  );
+
+  // Redibuja la ruta principal
+  if (routeEntity) viewer.entities.remove(routeEntity);
+  routeEntity = viewer.entities.add({
+    name: "Ruta",
+    polyline: { positions: routePositionsCartesian, width: 4, clampToGround: false, material: Cesium.Color.YELLOW.withAlpha(2) }
+  });
+
+  // Recalcula métricas (NO arranca animación)
+  routeLengthMeters = pathLengthMeters(routePositionsCartesian);
+  totalLengthEl.textContent = fmtMeters(routeLengthMeters);
+  totalTimeEl.textContent   = fmtDuration(totalSecondsFor(routeLengthMeters, Number(speedInput?.value || 30)));
+
+  // Limpia borradores
+  cleanupDraft();
+
+  // Reset entidad móvil y reloj (no auto-play)
+  if (moverEntity) { viewer.entities.remove(moverEntity); moverEntity = null; }
+  sampledPos = null;
+  startTime = stopTime = null;
+
+  // Mantén la vista en la nueva ruta
+  viewer.flyTo(routeEntity, {
+    duration: 0.8,
+    offset: new Cesium.HeadingPitchRange(
+      viewer.scene.camera.heading,
+      Cesium.Math.toRadians(-25),
+      400
+    )
+  });
+}
+
+function cancelDrawingRoute(){
+  if (!drawing) return;
+  stopDrawHandler();
+  cleanupDraft();
+}
+
+function stopDrawHandler(){
+  drawing = false;
+  if (drawHandler) { drawHandler.destroy(); drawHandler = null; }
+}
+
+function cleanupDraft(){
+  if (draftPolylineEntity){ viewer.entities.remove(draftPolylineEntity); draftPolylineEntity = null; }
+  for (const e of draftPointEntities){ viewer.entities.remove(e); }
+  draftPointEntities = [];
+  draftPositions = [];
+  draftPositionsCart = [];
+}
+
+function pickCartographic(winPos){
+  // pick con profundidad (terreno). Si falla, usar elipsoide.
+  let c = null;
+  if (viewer.scene.pickPositionSupported) {
+    const cartesian = viewer.scene.pickPosition(winPos);
+    if (Cesium.defined(cartesian)) {
+      const carto = Cesium.Cartographic.fromCartesian(cartesian);
+      if (carto) c = carto;
+    }
+  }
+  if (!c) {
+    const cartesian = viewer.camera.pickEllipsoid(winPos, Cesium.Ellipsoid.WGS84);
+    if (Cesium.defined(cartesian)) c = Cesium.Cartographic.fromCartesian(cartesian);
+  }
+  return c;
+}
+
 // ====== VALIDADORES ======
 function debugStatus(where){
   try{

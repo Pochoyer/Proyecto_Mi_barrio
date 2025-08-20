@@ -14,11 +14,18 @@
 <body>
   <header class="topbar">
     <h1>Recorrido virtual — Cesium</h1>
+    
     <div class="controls">
+      <nav class="navbar">
+      <ul>
+       <a id="home" href="./index.html" class="btn">Inicio</a>
+      </ul>
+    </nav>
       <label class="control">
         Velocidad (km/h)
-        <input id="speed" type="number" min="1" step="1" value="30">
+        <input id="speed" type="number" min="1" step="1" value="0">
       </label>
+      
 
       <label class="control inline">
         <input id="followCam" type="checkbox" checked>
@@ -28,6 +35,9 @@
       <button id="play" class="btn">▶ Iniciar</button>
       <button id="pause" class="btn">⏸ Pausar</button>
       <button id="reset" class="btn">⟲ Reiniciar</button>
+      <button id="draw" class="btn">✚ Nuevo recorrido</button>
+      <button id="finishDraw" class="btn">✔ Usar</button>
+      <button id="cancelDraw" class="btn">✖ Cancelar</button>
     </div>
   </header>
 
@@ -35,10 +45,10 @@
     <div id="cesiumContainer" class="viewer"></div>
     <aside class="sidebar">
       <p class="hint">
-       <h2>Pasos para iniciar el recorrido</h2> 
-        • Selecciona una <b>velocidad</b> y pulsa <b>Iniciar</b> para comenzar el recorrido.<br>
-        • Puedes rotar la cámara con clic izquierdo, mover con derecho y zoom con la rueda.<br>
-        • Marca “Seguir cámara” para que el dron sea rastreado automáticamente.<br>
+       <h2>Pasos para iniciar el recorrido:</h2> 
+        1. Selecciona una <b>velocidad</b> y pulsa <b>Iniciar</b> para comenzar el recorrido.<br>
+        2. Puedes rotar la cámara con clic izquierdo, mover con derecho y zoom con la rueda.<br>
+        3. Marca “Seguir cámara” para que el dron sea rastreado automáticamente.<br>
      
       <br><h2>Detalle del recorrido</h2>
       <div class="stat"><span>Longitud total:</span> <strong id="totalLength">—</strong></div>
@@ -48,7 +58,7 @@
   </main>
 
   <footer class="foot">
-    <small>Hecho para tu LineString GeoJSON. CesiumJS © Cesium.</small>
+    <small>© 2025 Todos los derechos reservados.</small>
   </footer>
 
   <script src="./recorrido.js"></script>
