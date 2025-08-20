@@ -26,74 +26,44 @@ async function loadJSON(url) { const r = await fetch(url); if (!r.ok) throw new 
 
 function tipoViaLargo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'DG') return 'Diagonal'; if (s === 'KR') return 'Carrera'; if (s === 'CL') return 'Calle'; if (s === 'TV') return 'Transversal'; return s || '-'; }
 
-function colorPorTipo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'KR') return '#d73027'; if (s === 'CL') return '#377eb8'; if (s === 'DG') return '#1a9850'; if (s === 'TV') return '#984ea3'; return '#7f7f7f'; }
-
-function dashPorTipo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'KR') return ''; if (s === 'CL') return '12,4'; if (s === 'DG') return '4,6'; if (s === 'TV') return '14,5,3,5'; return ''; }
-
-function weightFromClass(p) { const c = Number(p.MVITCla); if (Number.isNaN(c)) return 4; if (c <= 1) return 7; if (c <= 2) return 5.5; if (c <= 3) return 4; if (c <= 4) return 3; return 2; }
+function classValue(p) { const c = Number(p.MVITCla); return Number.isNaN(c) ? 3 : Math.max(1, Math.min(5, Math.round(c))); }
+function redShadeByClass(c) { if (c <= 1) return '#ff0000'; if (c === 2) return '#ff3333'; if (c === 3) return '#ff6666'; if (c === 4) return '#ff9999'; return '#ffcccc'; }
+function weightFromClass(p) { const c = classValue(p); if (c === 1) return 8; if (c === 2) return 6; if (c === 3) return 3; if (c === 4) return 2; return 1; }
 
 function viaInfoHTML(p) { const etiqueta = p.MVIEtiquet ?? '-'; const tipo = tipoViaLargo(p.MVITipo); const clase = p.MVITCla ?? '-'; const vel = p.MVIVelReg ?? '-'; const calz = p.MVINumC ?? '-'; const codigo = p.MVICodigo ?? '-'; return `<strong>${etiqueta}</strong><br>Tipo: ${tipo}<br>Clase: ${clase}<br>Vel. regl.: ${vel} km/h<br>Calzadas: ${calz}<br>Código: ${codigo}`; }
 
-function styleViasFeature(feat) {
-  const p = feat.properties || {};
-  const t = p.MVITipo;
-  const baseDash = dashPorTipo(t);
-  const esProj = ((p.estado || '').toString().toLowerCase() === 'proyectada');
-  const dash = esProj ? (baseDash ? `${baseDash},2,4` : '4,4') : baseDash;
-  return { pane: 'viasPane', color: colorPorTipo(t), weight: weightFromClass(p), opacity: 0.95, dashArray: dash || null, lineCap: 'butt' };
-}
+function styleViasFeature(feat) { const p = feat.properties || {}; const c = classValue(p); const color = redShadeByClass(c); const esProj = ((p.estado || '').toString().toLowerCase() === 'proyectada'); const dash = esProj ? '6,6' : null; return { color, weight: weightFromClass(p), opacity: 0.98, dashArray: dash, lineCap: 'butt' }; }
 
-function guessParaderoImg(p) {
-  const direct = p.imagen || p.image || p.image_url || p.foto || p.FOTO || null;
-  if (direct) return direct;
-  const nombre = p.nombre_par || p.nombre || p.name;
-  if (nombre && PARADERO_IMG_MAP[nombre]) return PARADERO_IMG_MAP[nombre];
-  const cenefa = p.cenefa;
-  if (cenefa && PARADERO_IMG_MAP[cenefa]) return PARADERO_IMG_MAP[cenefa];
-  if (cenefa) return `${PARADERO_IMG_DIR}${cenefa}.png`;
-  const consec = p.consec_par || p.codigo || p.code;
-  if (consec) return `${PARADERO_IMG_DIR}${consec}.png`;
-  return PARADERO_DEFAULT_IMG;
-}
+function guessParaderoImg(p) { const direct = p.imagen || p.image || p.image_url || p.foto || p.FOTO || null; if (direct) return direct; const nombre = p.nombre_par || p.nombre || p.name; if (nombre && PARADERO_IMG_MAP[nombre]) return PARADERO_IMG_MAP[nombre]; const cenefa = p.cenefa; if (cenefa && PARADERO_IMG_MAP[cenefa]) return PARADERO_IMG_MAP[cenefa]; if (cenefa) return `${PARADERO_IMG_DIR}${cenefa}.png`; const consec = p.consec_par || p.codigo || p.code; if (consec) return `${PARADERO_IMG_DIR}${consec}.png`; return PARADERO_DEFAULT_IMG; }
 
 function paraderoInfoHTML(p) { const nombre = p.nombre_par ?? p.nombre ?? p.name ?? 'Paradero'; const via = p.via_par ?? '-'; const dir = p.direcc_par ?? '-'; const cenefa = p.cenefa ?? '-'; const consec = p.consec_par ?? '-'; const modulo = p.modulo_par ?? '-'; const zona = p.zona_par ?? '-'; return `<strong>${nombre}</strong><br>Vía: ${via}<br>Dirección: ${dir}<br>Cenefa: ${cenefa}<br>Código: ${consec}<br>Módulo: ${modulo}<br>Zona: ${zona}`; }
 
 function paraderoPopupHTML(p, imgUrl) { const core = paraderoInfoHTML(p); const img = imgUrl ? `<img src="${encodeURI(imgUrl)}" style="max-width:220px; display:block; margin-top:8px; border:1px solid #ddd; border-radius:6px;" alt="Paradero"/>` : ''; return `${core}${img}`; }
 
-function addLegend() {
-  const legend = L.control({ position: 'bottomright' });
-  legend.onAdd = function() {
-    const div = L.DomUtil.create('div', 'legend');
-    div.innerHTML = `
+function addLegendTipos() { const legend = L.control({ position: 'bottomright' }); legend.onAdd = function() { const div = L.DomUtil.create('div', 'legend'); div.innerHTML = `
       <div><strong>Tipos de vía</strong></div>
-      <div class="row"><span class="swatch swatch-kr"></span> KR (Carrera)</div>
-      <div class="row"><span class="swatch swatch-cl"></span> CL (Calle)</div>
-      <div class="row"><span class="swatch swatch-dg"></span> DG (Diagonal)</div>
-      <div class="row"><span class="swatch swatch-tv"></span> TV (Transversal)</div>
-    `;
-    return div;
-  };
-  legend.addTo(map);
-}
+      <div class="row"><span class="swatch"></span> KR (Carrera)</div>
+      <div class="row"><span class="swatch"></span> CL (Calle)</div>
+      <div class="row"><span class="swatch"></span> DG (Diagonal)</div>
+      <div class="row"><span class="swatch"></span> TV (Transversal)</div>
+    `; return div; }; legend.addTo(map); }
 
 let viasLayer, paraderosLayer, viasData, paraderosData;
 const tiposActivos = new Set(['KR','CL','DG','TV']);
 
-function featurePasaFiltro(feat) {
-  const t = (feat.properties?.MVITipo || '').toString().toUpperCase();
-  return tiposActivos.has(t);
-}
+function featurePasaFiltro(feat) { const t = (feat.properties?.MVITipo || '').toString().toUpperCase(); return tiposActivos.has(t); }
 
 function renderVias() {
   if (viasLayer) map.removeLayer(viasLayer);
   viasLayer = L.geoJSON(viasData, {
+    pane: 'viasPane',
     filter: featurePasaFiltro,
     style: styleViasFeature,
     onEachFeature: (feat, layer) => {
       const p = feat.properties || {};
-      layer.bindTooltip(() => viaInfoHTML(p), { sticky: true, direction: 'top', opacity: 0.95 });
+      layer.bindTooltip(() => viaInfoHTML(p), { sticky: true, direction: 'top', opacity: 0.98 });
       layer.on({
-        mouseover: () => { layer.setStyle({ weight: weightFromClass(p) + 2 }); layer.bringToFront(); setInfo(viaInfoHTML(p)); showImage(null); },
+        mouseover: () => { layer.setStyle({ weight: weightFromClass(p) + 2 }); layer.bringToFront(); if (paraderosLayer) paraderosLayer.bringToFront(); setInfo(viaInfoHTML(p)); showImage(null); },
         mouseout: () => { layer.setStyle(styleViasFeature(feat)); setInfo('Acerca el cursor a una vía o haz clic en un paradero…'); },
         click: (e) => { L.popup().setLatLng(e.latlng).setContent(viaInfoHTML(p)).openOn(map); }
       });
@@ -143,7 +113,7 @@ function ajustarVista() {
     }).addTo(map);
 
     L.control.scale({ metric: true, imperial: false }).addTo(map);
-    addLegend();
+    addLegendTipos();
     ajustarVista();
   } catch (err) {
     console.error(err);

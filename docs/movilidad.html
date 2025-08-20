@@ -14,16 +14,9 @@
     .soft { color:#555; }
     .info-img { width:100%; max-height:220px; object-fit:cover; border:1px solid #ddd; border-radius:6px; }
     .leaflet-container { cursor: crosshair; }
-    .legend { background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px 10px; line-height:1.4; font-size:.9rem; }
-    .legend .row { display:flex; align-items:center; gap:8px; margin:4px 0; }
-    .legend .swatch { width:34px; height:6px; border-radius:3px; }
-    .swatch-kr { background:#d73027; }
-    .swatch-cl { background:repeating-linear-gradient(90deg,#377eb8 0 12px,transparent 12px 20px); }
-    .swatch-dg { background:repeating-linear-gradient(90deg,#1a9850 0 4px,transparent 4px 14px); }
-    .swatch-tv { background:linear-gradient(90deg,#984ea3 0 0); position:relative; }
-    .swatch-tv::after { content:""; position:absolute; inset:0; background:
-      linear-gradient(90deg, transparent 0 18px, #984ea3 18px 22px, transparent 22px 30px),
-      repeating-linear-gradient(90deg, transparent 0 30px, #984ea3 30px 32px, transparent 32px 40px); }
+    .legend { background:rgba(255,255,255,.9); border:1px solid #ccc; border-radius:4px; padding:6px 8px; line-height:1.2; font-size:.78rem; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    .legend .row { display:flex; align-items:center; gap:6px; margin:2px 0; }
+    .legend .swatch { width:26px; height:5px; border-radius:2px; background:#ff0000; }
     .filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0 12px; }
     .filters label { display:flex; align-items:center; gap:6px; }
   </style>
@@ -45,7 +38,7 @@
 
     <main>
       <h2>Vías y movilidad</h2>
-      <p class="soft">Colores y estilos distintos por tipo de vía. Usa los filtros para mostrar/ocultar tipos.</p>
+      <p class="soft">Vías en rojo (más claras a mayor clase). Usa los filtros para mostrar/ocultar tipos.</p>
       <div class="layout" style="margin-bottom:16px;">
         <div id="map-mov"></div>
         <aside id="panel-mov">
