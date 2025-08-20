@@ -1,102 +1,98 @@
-/* ===== RECORRIDO 3D (alineado a catastro3d.css) ===== */
-.recorrido3d {
-  background: #f9f9f9;
-  font-family: Arial, sans-serif;
+/* --- Catastro 3D estilos específicos --- */
+
+body {
   margin: 0;
-  padding: 0;
+  background: #e5e7eb; /* gris claro */
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* ============ NAVBAR (igual a catastro) ============ */
-.navbar {
-  background: #e3e3e3;               /* barra gris como en la segunda imagen */
-  border-top: 1px solid #d8d8d8;
-  border-bottom: 1px solid #d8d8d8;
+.pagina {
+  max-width: 1200px;
+  margin: auto;
+  background: #fff;
+  border: 5px solid #000;
+  box-sizing: border-box;
 }
-.navbar ul{
-  list-style: none;
+
+header {
   display: flex;
-  gap: 32px;
-  justify-content: center;            /* centrado */
   align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #f8f8f8;
+}
+
+header img { height: 60px; }
+header h1 {
   margin: 0;
-  padding: 10px 0;
-}
-.navbar li{ margin: 0; }
-.navbar a{
-  text-decoration: none;
-  font-weight: bold;
-  color: #333;
-  font-size: 18px;
-}
-.navbar a:hover{ color:#0a7d47; }
-.navbar a.active{
-  background:#3cb371; color:#fff; padding:6px 10px; border-radius:8px;
+  font-size: 1.6rem;
+  color: #222;
 }
 
-/* ============ HEADER de sección (título centrado) ============ */
-.page-header{
-  padding:16px 20px;
-  background:#fff;
-  border-bottom:1px solid #e5e5e5;
-  text-align:center;
+.navbar {
+  background: #e0e0e0;
+  padding: 8px 0;
 }
-.page-header h2{
-  margin:0 0 6px;
-  font-size:2rem;
-  color:#333;
+.navbar ul {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; justify-content: center; gap: 18px;
 }
+.navbar a {
+  text-decoration: none; color: #333; font-weight: 600;
+}
+.navbar a.active { color: #0369a1; text-decoration: underline; }
 
-/* ============ Toolbar igual que en catastro3d ============ */
-.recorrido3d .toolbar {
-  position: relative;
-  display: inline-block;
-  margin: 12px 16px 0 16px;
-  background: #fff;
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.10);
-  font-size: 14px;
+.page-header {
+  padding: 10px 14px;
 }
+.page-header h2 { margin: 8px 0 2px; }
+.page-header p  { margin: 0; color: #334155; }
 
-/* Botones de control */
-.recorrido3d .controls button {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 6px 10px;
-  background: #fff;
-  cursor: pointer;
-  margin-right: 6px;
-}
-.recorrido3d .controls button:hover { background: #f3f3f3; }
-
-/* Slider de velocidad */
-.recorrido3d .controls .speed {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-}
-.recorrido3d .controls input[type="range"] {
-  vertical-align: middle;
-}
-
-/* Contenedor Cesium alineado al de catastro */
-.recorrido3d #cesiumContainer {
-  width: 97%;
-  height: 620px;          /* ajusta a gusto */
-  min-height: 520px;
-  margin: 10px 16px 16px 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.10);
+/* Contenedor Cesium */
+#cesiumContainer{
+  width: 100%;
+  height: 70vh;             /* modifica a gusto */
+  min-height: 560px;
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
   background: #f0f0f0;
 }
 
-/* Ajustes widgets Cesium */
-.recorrido3d .cesium-viewer-toolbar { right: 18px; top: 18px; }
-.recorrido3d .cesium-viewer-bottom { bottom: 6px; left: 6px; right: 6px; }
+/* Toolbar de controles */
+.toolbar{
+  display: flex; flex-wrap: wrap; gap: 12px;
+  align-items: center; justify-content: space-between;
+  background: #ffffffcc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 8px 14px 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.toolbar .controls { display: flex; gap: 8px; align-items: center; }
+.toolbar .speed { display: inline-flex; align-items: center; gap: 8px; }
+.toolbar .info  { font-size: 13px; color: #475569; }
 
-@media (max-width: 768px){
-  .recorrido3d #cesiumContainer { height: 70vh; margin: 8px; }
-  .recorrido3d .toolbar { margin: 8px; }
+.toolbar button{
+  border: 1px solid #94a3b8;
+  background: #0ea5e9;
+  color: #fff; border-radius: 999px;
+  padding: 8px 12px; cursor: pointer; font-weight: 700;
+}
+.toolbar button:hover{ filter: brightness(1.05); }
+
+.warning{
+  margin: 8px 14px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffe69c;
+}
+
+footer{
+  background: #111827;
+  color:#e5e7eb;
+  text-align: center;
+  padding: 12px 10px;
 }
