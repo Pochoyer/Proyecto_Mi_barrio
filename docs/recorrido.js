@@ -31,6 +31,66 @@ function fmtMeters(m){ return m>=1000 ? (m/1000).toFixed(2)+" km" : m.toFixed(0)
 function fmtDuration(sec){ const s=Math.max(0,Math.round(sec)); const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), r=s%60;
   if(h) return `${h}h ${m}m ${r}s`; if(m) return `${m}m ${r}s`; return `${r}s`; }
 function lineStringToCartographic(coords){ return coords.map(([lon,lat])=>Cesium.Cartographic.fromDegrees(lon,lat,0)); }
+// ======== EXTRUSIÓN DE EDIFICIOS (Catastro 3D) ========
+const GEOJSON_URL = "capas/Const_Villa_Anny_II.json";
+const METERS_PER_FLOOR = 3;
+
+// Claves posibles en el GeoJSON para # de pisos (ajústalas si difiere)
+const FLOOR_KEYS = ["CONELEVACI"];
+
+// Lee pisos desde la bolsa de propiedades (soporta propiedades estáticas o time-dynamic)
+function getFloorsFromPropsBag(propsBag, now) {
+  const p = propsBag && typeof propsBag.getValue === "function"
+    ? (propsBag.getValue(now) || {})
+    : (propsBag || {});
+  for (const k of FLOOR_KEYS) {
+    if (p[k] != null && !Number.isNaN(Number(p[k]))) return Number(p[k]);
+  }
+  return null;
+}
+
+// Carga y extruye polígonos del GeoJSON (no auto-cambia cámara)
+async function loadExtrudedBuildings() {
+  const ds = await Cesium.GeoJsonDataSource.load(GEOJSON_URL); // no uses clampToGround si vas a extruir
+  viewer.dataSources.add(ds);
+
+  const now = Cesium.JulianDate.now();
+
+  for (const e of ds.entities.values) {
+    const pol = e.polygon;
+    if (!pol) continue;
+
+    const floors = getFloorsFromPropsBag(e.properties, now);
+    const props = e.properties && e.properties.getValue ? (e.properties.getValue(now) || {}) : (e.properties || {});
+    const alturaDirecta = (props.altura != null && !Number.isNaN(Number(props.altura))) ? Number(props.altura) : null;
+
+    const extruded = alturaDirecta != null
+      ? alturaDirecta
+      : (Math.max(1, floors ?? 1) * METERS_PER_FLOOR);
+
+    // Extrusión referida al terreno
+    pol.heightReference = Cesium.HeightReference.CLAMP_TO_GROUND;
+    pol.extrudedHeight = extruded;
+    pol.extrudedHeightReference = Cesium.HeightReference.RELATIVE_TO_GROUND;
+
+    // Estilo del edificio
+    pol.material = Cesium.Color.fromCssColorString("#3cb371").withAlpha(0.80);
+    pol.outline = true;
+    pol.outlineColor = Cesium.Color.BLACK;
+
+    // Tooltip
+    e.description = `
+      <table class="cesium-infoBox-defaultTable">
+        <tr><th>Pisos</th><td>${floors ?? "-"}</td></tr>
+        <tr><th>Altura</th><td>${extruded.toFixed(2)} m</td></tr>
+      </table>
+    `;
+  }
+
+  // (Opcional) si quieres reencuadrar al barrio:
+  // await viewer.flyTo(ds, { duration: 1.6 });
+}
+
 
 // ===================== UI refs =====================
 const speedInput = document.getElementById("speed");
@@ -66,6 +126,9 @@ let startTime, stopTime, sampledPos;
     // 3) Preparar ruta
     await initRoute();
 
+    // 3.1) Cargar edificios extruidos del catastro 3D
+    await loadExtrudedBuildings();   // <= añade esto aquí
+    
     // 4) UI
     wireUI();
 
