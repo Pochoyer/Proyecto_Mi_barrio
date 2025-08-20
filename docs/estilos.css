@@ -103,3 +103,14 @@ footer {
     margin: 10px auto;
     display: block;
 }
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 32px;
+  margin: 0;
+  padding: 10px 0;
+}
+.navbar li { margin: 0; }
+.navbar a { text-decoration: none; font-weight: bold; color: #333; font-size: 18px; }
+.navbar a:hover { color: #0a7d47; }
+.navbar a.active { background: #3cb371; color: #fff; padding: 6px 10px; border-radius: 8px; }
