@@ -77,15 +77,17 @@ function addLegendAQI() {
   legend.addTo(map);
 }
 
+const AREA_URL = './capas/Villa_Anny_II.geojson';
+
 async function loadArea() {
-  const r = await fetch('./capas/Sector_Villa_Anny_II.json');
+  const r = await fetch(AREA_URL);
   if (!r.ok) throw new Error('No se pudo cargar el polígono del área');
   return r.json();
 }
 
-let marker, areaLayer;
+let areaLayer, areaData, popup;
 
-async function updateAt(lat, lon) {
+async function colorizePolygonByAQI(lat, lon) {
   const data = await loadOpenMeteoAQ(lat, lon);
   const h = data.hourly || {};
   const idx = latestIndex(h.time || []);
@@ -98,30 +100,29 @@ async function updateAt(lat, lon) {
   const co  = h.carbon_monoxide ? h.carbon_monoxide[idx] : null;
   const t   = (h.time && h.time[idx]) ? h.time[idx] : null;
   const color = aqiColor(aqi);
-  if (marker) map.removeLayer(marker);
-  marker = L.circleMarker([lat, lon], { radius: 18, color: '#222', weight: 1, fillColor: color, fillOpacity: 0.95 }).addTo(map);
+  if (areaLayer) areaLayer.setStyle({ color: color, weight: 2, fillColor: color, fillOpacity: 0.45, opacity: 0.9 });
   const html = panelHTML(t, aqi, p25, p10, no2, o3, so2, co, lat, lon);
   setInfo(html);
-  marker.bindPopup(`<div style="min-width:220px">${html}</div>`);
+  const where = L.latLng(lat, lon);
+  if (popup) popup.remove();
+  popup = L.popup({ maxWidth: 260 }).setLatLng(where).setContent(`<div style="min-width:220px">${html}</div>`).openOn(map);
 }
 
 (async function bootstrap(){
   try {
     let lat = 4.6050257972928375, lon = -74.20169397856526;
-    try {
-      const area = await loadArea();
-      areaLayer = L.geoJSON(area, { style: { color:'#333', weight:2, fillColor:'#5dade2', fillOpacity:0.12 } }).addTo(map);
-      const b = areaLayer.getBounds();
-      if (b.isValid()) map.fitBounds(b.pad(0.05));
-      const centroid = turf.centroid(area);
-      if (centroid && centroid.geometry && centroid.geometry.coordinates) {
-        lon = centroid.geometry.coordinates[0];
-        lat = centroid.geometry.coordinates[1];
-      }
-    } catch (e) {}
-    await updateAt(lat, lon);
+    areaData = await loadArea();
+    areaLayer = L.geoJSON(areaData, { style: { color:'#333', weight:2, fillColor:'#5dade2', fillOpacity:0.12 } }).addTo(map);
+    const b = areaLayer.getBounds();
+    if (b.isValid()) map.fitBounds(b.pad(0.05));
+    const centroid = turf.centroid(areaData);
+    if (centroid && centroid.geometry && centroid.geometry.coordinates) {
+      lon = centroid.geometry.coordinates[0];
+      lat = centroid.geometry.coordinates[1];
+    }
+    await colorizePolygonByAQI(lat, lon);
     addLegendAQI();
-    map.on('click', async (e) => { await updateAt(e.latlng.lat, e.latlng.lng); });
+    map.on('click', async (e) => { await colorizePolygonByAQI(e.latlng.lat, e.latlng.lng); });
   } catch (e) {
     console.error(e);
     setInfo('No se pudo cargar la calidad del aire. Reintenta.');
