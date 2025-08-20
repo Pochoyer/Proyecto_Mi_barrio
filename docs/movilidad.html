@@ -14,6 +14,18 @@
     .soft { color:#555; }
     .info-img { width:100%; max-height:220px; object-fit:cover; border:1px solid #ddd; border-radius:6px; }
     .leaflet-container { cursor: crosshair; }
+    .legend { background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px 10px; line-height:1.4; font-size:.9rem; }
+    .legend .row { display:flex; align-items:center; gap:8px; margin:4px 0; }
+    .legend .swatch { width:34px; height:6px; border-radius:3px; }
+    .swatch-kr { background:#d73027; }
+    .swatch-cl { background:repeating-linear-gradient(90deg,#377eb8 0 12px,transparent 12px 20px); }
+    .swatch-dg { background:repeating-linear-gradient(90deg,#1a9850 0 4px,transparent 4px 14px); }
+    .swatch-tv { background:linear-gradient(90deg,#984ea3 0 0); position:relative; }
+    .swatch-tv::after { content:""; position:absolute; inset:0; background:
+      linear-gradient(90deg, transparent 0 18px, #984ea3 18px 22px, transparent 22px 30px),
+      repeating-linear-gradient(90deg, transparent 0 30px, #984ea3 30px 32px, transparent 32px 40px); }
+    .filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0 12px; }
+    .filters label { display:flex; align-items:center; gap:6px; }
   </style>
 </head>
 <body>
@@ -33,10 +45,17 @@
 
     <main>
       <h2>Vías y movilidad</h2>
-      <p class="soft">Pasa el cursor por las vías para ver su información. Haz clic en un paradero para ver una imagen informativa.</p>
+      <p class="soft">Colores y estilos distintos por tipo de vía. Usa los filtros para mostrar/ocultar tipos.</p>
       <div class="layout" style="margin-bottom:16px;">
         <div id="map-mov"></div>
         <aside id="panel-mov">
+          <h3>Filtros</h3>
+          <div class="filters">
+            <label><input type="checkbox" data-tipo="KR" checked> KR (Carrera)</label>
+            <label><input type="checkbox" data-tipo="CL" checked> CL (Calle)</label>
+            <label><input type="checkbox" data-tipo="DG" checked> DG (Diagonal)</label>
+            <label><input type="checkbox" data-tipo="TV" checked> TV (Transversal)</label>
+          </div>
           <h3>Información</h3>
           <div id="info-mov" class="soft">Acerca el cursor a una vía o haz clic en un paradero…</div>
           <div id="info-img-wrap" style="margin-top:12px; display:none;">
