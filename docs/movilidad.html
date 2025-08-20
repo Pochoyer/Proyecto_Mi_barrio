@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Movilidad - Villa Anny II</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link rel="stylesheet" href="estilos.css"/>
+  <style>
+    .layout { display:flex; gap:12px; }
+    #map-mov { flex:3; height:72vh; border:2px solid #ccc; }
+    #panel-mov { flex:1; border:2px solid #ccc; background:#fff; padding:10px; }
+    #panel-mov h3 { margin-top:0; }
+    .soft { color:#555; }
+    .info-img { width:100%; max-height:220px; object-fit:cover; border:1px solid #ddd; border-radius:6px; }
+    .leaflet-container { cursor: crosshair; }
+    .legend { background:rgba(255,255,255,.9); border:1px solid #ccc; border-radius:4px; padding:6px 8px; line-height:1.2; font-size:.78rem; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    .legend .row { display:flex; align-items:center; gap:6px; margin:2px 0; }
+    .legend .swatch { width:26px; height:5px; border-radius:2px; background:#ff0000; }
+    .filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0 12px; }
+    .filters label { display:flex; align-items:center; gap:6px; }
+  </style>
+</head>
+<body>
+  <div class="pagina">
+    <header>
+      <a href="index.html"><img src="imagenes/Logo.png" alt="Logo"></a>
+      <h1>Movilidad: Villa Anny II</h1>
+    </header>
+
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="equipamientos.html">Equipamientos</a>
+      <a href="movilidad.html" class="active">Movilidad</a>
+      <a href="#">Problemáticas</a>
+      <a href="acerca_de.html">Acerca de</a>
+    </nav>
+
+    <main>
+      <h2>Vías y movilidad</h2>
+      <p class="soft">Vías en rojo (más claras a mayor clase). Usa los filtros para mostrar/ocultar tipos.</p>
+      <div class="layout" style="margin-bottom:16px;">
+        <div id="map-mov"></div>
+        <aside id="panel-mov">
+          <h3>Filtros</h3>
+          <div class="filters">
+            <label><input type="checkbox" data-tipo="KR" checked> KR (Carrera)</label>
+            <label><input type="checkbox" data-tipo="CL" checked> CL (Calle)</label>
+            <label><input type="checkbox" data-tipo="DG" checked> DG (Diagonal)</label>
+            <label><input type="checkbox" data-tipo="TV" checked> TV (Transversal)</label>
+          </div>
+          <h3>Información</h3>
+          <div id="info-mov" class="soft">Acerca el cursor a una vía o haz clic en un paradero…</div>
+          <div id="info-img-wrap" style="margin-top:12px; display:none;">
+            <img id="info-img" class="info-img" alt="Imagen informativa"/>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 Todos los derechos reservados</p>
+    </footer>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="movilidad.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "v1",
+    "nombre": "Av. Principal",
+    "tipo": "primaria",
+    "estado": "existente",
+    "velocidad": 60,
+    "coords": [
+      [4.6150, -74.1050],
+      [4.6190, -74.0950]
+    ]
+  },
+  {
+    "id": "v2",
+    "nombre": "Calle 10",
+    "tipo": "secundaria",
+    "estado": "proyectada",
+    "velocidad": 40,
+    "coords": [
+      [4.6120, -74.11],
+      [4.6100, -74.09]
+    ]
+  }
+]

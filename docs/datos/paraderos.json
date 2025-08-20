@@ -1,0 +1,14 @@
+[
+  {
+    "id": "p1",
+    "codigo": "A-101",
+    "nombre": "Paradero Central",
+    "coord": [4.616, -74.101]
+  },
+  {
+    "id": "p2",
+    "codigo": "B-202",
+    "nombre": "Paradero Norte",
+    "coord": [4.620, -74.098]
+  }
+]
