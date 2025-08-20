@@ -1,11 +1,9 @@
 {
 "type": "FeatureCollection",
-"name": "Paraderos SITP",
+"name": "Paraderos_SITP",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
 { "type": "Feature", "properties": { "OBJECTID_1": 2502, "object_id": 24154, "cenefa": "488A09", "consec_par": "488", "modulo_par": "A", "zona_par": 9, "nombre_par": "Br. Villa Anny I y II", "via_par": "DG 73D Bis Sur", "direcc_par": "DG 73D Bis Sur - KR 79 Bis A", "locali_par": 7, "consola_pa": "DG 73D Bis Sur - KR 79 Bis A (488A09)", "panel_par": "DG 73D Bis Sur - KR 79 Bis A", "audio_par": "Diagonal 73 D Bis Sur Carrera 79 Bis A", "longitud": -74.200823, "latitud": 4.605928, "coor_x": 98631.66534000001, "coor_y": 100107.68725 }, "geometry": { "type": "Point", "coordinates": [ -74.200823, 4.605928 ] } },
-{ "type": "Feature", "properties": { "OBJECTID_1": 2527, "object_id": 24179, "cenefa": "168B09", "consec_par": "168", "modulo_par": "B", "zona_par": 9, "nombre_par": "Br. Villa Anny I", "via_par": "TV 79D", "direcc_par": "TV 79D - DG 73B Sur", "locali_par": 7, "consola_pa": "TV 79D - DG 73B Sur  (168B09)", "panel_par": "TV 79D - DG 73B Sur", "audio_par": "Transversal 79 D Diagonal 73 Be Sur", "longitud": -74.19900469, "latitud": 4.606486025, "coor_x": 98651.84284, "coor_y": 100113.85452 }, "geometry": { "type": "Point", "coordinates": [ -74.1990047, 4.606486 ] } },
-{ "type": "Feature", "properties": { "OBJECTID_1": 2556, "object_id": 24208, "cenefa": "490A09", "consec_par": "490", "modulo_par": "A", "zona_par": 9, "nombre_par": "Br. Gran Colombiano", "via_par": "TV 79D", "direcc_par": "TV 79D - CL 73B Sur", "locali_par": 7, "consola_pa": "TV 79D - CL 73B Sur (490A09)", "panel_par": "TV 79D - CL 73B Sur", "audio_par": "Transversal 79 D Calle 73 Be Sur", "longitud": -74.1995531, "latitud": 4.607070032, "coor_x": 98645.75864, "coor_y": 100120.31361 }, "geometry": { "type": "Point", "coordinates": [ -74.1995531, 4.60707 ] } },
 { "type": "Feature", "properties": { "OBJECTID_1": 2569, "object_id": 24221, "cenefa": "168A09", "consec_par": "168", "modulo_par": "A", "zona_par": 9, "nombre_par": "Br. Villa Anny I", "via_par": "TV 79D", "direcc_par": "TV 79D - DG 73B Sur", "locali_par": 7, "consola_pa": "TV 79D - DG 73B Sur  (168A09)", "panel_par": "TV 79D - DG 73B Sur", "audio_par": "Transversal 79 D Diagonal 73 Be Sur", "longitud": -74.200109, "latitud": 4.607405, "coor_x": 98639.59088, "coor_y": 100124.0188 }, "geometry": { "type": "Point", "coordinates": [ -74.200109, 4.607405 ] } }
 ]
 }
