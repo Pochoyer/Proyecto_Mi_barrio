@@ -1,4 +1,4 @@
-const map = L.map('map-aq', { zoomControl: true }).setView([4.616, -74.1], 13);
+const map = L.map('map-aq', { zoomControl: true }).setView([4.6050257972928375, -74.20169397856526], 14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20, attribution: '&copy; OpenStreetMap' }).addTo(map);
 
 const infoBox = document.getElementById('aq-info');
@@ -88,7 +88,7 @@ let marker;
 
 (async function bootstrap(){
   try {
-    const lat = 4.616, lon = -74.1;
+    const lat = 4.6050257972928375, lon = -74.20169397856526;
     const data = await loadOpenMeteoAQ(lat, lon);
     const h = data.hourly || {};
     const idx = latestIndex(h.time || []);
