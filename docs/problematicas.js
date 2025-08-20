@@ -77,11 +77,11 @@ function addLegendAQI() {
   legend.addTo(map);
 }
 
-const AREA_URL = './capas/Villa_Anny_II.geojson';
+const AREA_URL = './capas/Sector_Villa_Anny_II.json';
 
 async function loadArea() {
   const r = await fetch(AREA_URL);
-  if (!r.ok) throw new Error('No se pudo cargar el polígono del área');
+  if (!r.ok) throw new Error(`No se pudo cargar el polígono: ${AREA_URL}`);
   return r.json();
 }
 
@@ -110,21 +110,31 @@ async function colorizePolygonByAQI(lat, lon) {
 
 (async function bootstrap(){
   try {
+    setInfo('Cargando polígono y calidad del aire…');
+    addLegendAQI();
+
     let lat = 4.6050257972928375, lon = -74.20169397856526;
     areaData = await loadArea();
+
     areaLayer = L.geoJSON(areaData, { style: { color:'#333', weight:2, fillColor:'#5dade2', fillOpacity:0.12 } }).addTo(map);
     const b = areaLayer.getBounds();
-    if (b.isValid()) map.fitBounds(b.pad(0.05));
-    const centroid = turf.centroid(areaData);
-    if (centroid && centroid.geometry && centroid.geometry.coordinates) {
-      lon = centroid.geometry.coordinates[0];
-      lat = centroid.geometry.coordinates[1];
+    if (b && b.isValid()) map.fitBounds(b.pad(0.05));
+
+    try {
+      const centroid = turf.centroid(areaData);
+      if (centroid && centroid.geometry && centroid.geometry.coordinates) {
+        lon = centroid.geometry.coordinates[0];
+        lat = centroid.geometry.coordinates[1];
+      }
+    } catch (e) {
+      if (b && b.isValid()) { const c = b.getCenter(); lat = c.lat; lon = c.lng; }
     }
+
     await colorizePolygonByAQI(lat, lon);
-    addLegendAQI();
+
     map.on('click', async (e) => { await colorizePolygonByAQI(e.latlng.lat, e.latlng.lng); });
   } catch (e) {
     console.error(e);
-    setInfo('No se pudo cargar la calidad del aire. Reintenta.');
+    setInfo('No se pudo cargar la calidad del aire o el polígono. Revisa la consola y la ruta del archivo.');
   }
 })();

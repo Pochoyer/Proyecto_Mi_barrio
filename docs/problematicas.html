@@ -38,7 +38,7 @@
 
     <main>
       <h2>Calidad del aire en la zona</h2>
-      <p class="soft">Indicador US AQI con datos horarios; el color refleja la categoría de riesgo.</p>
+      <p class="soft">El polígono del barrio se tiñe con el color del US AQI. Haz clic en el mapa para consultar otro punto.</p>
       <div class="layout" style="margin-bottom:16px;">
         <div id="map-aq"></div>
         <aside id="panel-aq">
@@ -54,6 +54,7 @@
   </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
   <script src="problematicas.js"></script>
 </body>
 </html>
