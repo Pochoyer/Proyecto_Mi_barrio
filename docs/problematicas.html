@@ -5,7 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Problemáticas – Villa Anny II, Bosa</title>
   <link rel="stylesheet" href="estilos.css" />
-
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    .layout { display:flex; gap:12px; }
+    #map-aq { flex:3; height:72vh; border:2px solid #ccc; }
+    #panel-aq { flex:1; border:2px solid #ccc; background:#fff; padding:10px; }
+    #panel-aq h3 { margin-top:0; }
+    .soft { color:#555; }
+    .legend { background:rgba(255,255,255,.9); border:1px solid #ccc; border-radius:4px; padding:6px 8px; line-height:1.2; font-size:.78rem; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    .legend .row { display:flex; align-items:center; gap:6px; margin:2px 0; }
+    .legend .swatch { width:26px; height:10px; border-radius:2px; }
+  </style>
 </head>
 <body>
   <div class="pagina">
@@ -18,7 +28,7 @@
       <ul>
         <li><a href="index.html">Inicio</a></li>
         <li><a href="equipamientos.html">Equipamientos</a></li>
-        <li><a href="movilidad.html">Movilidad</a></li>        
+        <li><a href="movilidad.html">Movilidad</a></li>
         <li><a href="catastro3d.html">Catastro 3D</a></li>
         <li><a href="recorrido3d.html">Recorrido 3D</a></li>
         <li><a class="active" href="problematicas.html">Problemáticas</a></li>
@@ -27,12 +37,23 @@
     </nav>
 
     <main>
-      <h2>diligenciar aquí</h2>
+      <h2>Calidad del aire en la zona</h2>
+      <p class="soft">Indicador US AQI con datos horarios; el color refleja la categoría de riesgo.</p>
+      <div class="layout" style="margin-bottom:16px;">
+        <div id="map-aq"></div>
+        <aside id="panel-aq">
+          <h3>Información</h3>
+          <div id="aq-info" class="soft">Cargando calidad del aire…</div>
+        </aside>
+      </div>
     </main>
 
     <footer>
       <p>© 2025 Todos los derechos reservados</p>
     </footer>
   </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="problematicas.js"></script>
 </body>
 </html>
