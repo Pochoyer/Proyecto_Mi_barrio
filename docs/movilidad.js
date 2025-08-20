@@ -28,7 +28,7 @@ function tipoViaLargo(sigla) { const s = (sigla || '').toString().toUpperCase();
 
 function colorPorTipo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'KR') return '#d73027'; if (s === 'CL') return '#377eb8'; if (s === 'DG') return '#1a9850'; if (s === 'TV') return '#984ea3'; return '#7f7f7f'; }
 
-function dashPorTipo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'KR') return ''; if (s === 'CL') return '12,4'; if (s === 'DG') return '2,6'; if (s === 'TV') return '14,5,3,5'; return ''; }
+function dashPorTipo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'KR') return ''; if (s === 'CL') return '12,4'; if (s === 'DG') return '4,6'; if (s === 'TV') return '14,5,3,5'; return ''; }
 
 function weightFromClass(p) { const c = Number(p.MVITCla); if (Number.isNaN(c)) return 4; if (c <= 1) return 7; if (c <= 2) return 5.5; if (c <= 3) return 4; if (c <= 4) return 3; return 2; }
 
