@@ -2,7 +2,6 @@ const map = L.map('map-aq', { zoomControl: true }).setView([4.6050257972928375, 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20, attribution: '&copy; OpenStreetMap' }).addTo(map);
 
 const infoBox = document.getElementById('aq-info');
-
 function setInfo(html) { infoBox.innerHTML = html; }
 
 function aqiColor(aqi) {
@@ -25,10 +24,7 @@ function aqiCategory(aqi) {
   return 'Peligrosa';
 }
 
-function fmt(x, digits=1) {
-  if (x == null || isNaN(x)) return '-';
-  return Number(x).toFixed(digits);
-}
+function fmt(x, digits=1) { if (x == null || isNaN(x)) return '-'; return Number(x).toFixed(digits); }
 
 async function loadOpenMeteoAQ(lat, lon) {
   const params = new URLSearchParams({
@@ -44,18 +40,14 @@ async function loadOpenMeteoAQ(lat, lon) {
 }
 
 function latestIndex(times) {
-  let idx = times.length - 1;
-  const now = new Date();
-  for (let i = times.length - 1; i >= 0; i--) {
-    const t = new Date(times[i]);
-    if (t <= now) { idx = i; break; }
-  }
+  let idx = times.length - 1, now = new Date();
+  for (let i = times.length - 1; i >= 0; i--) { const t = new Date(times[i]); if (t <= now) { idx = i; break; } }
   return idx;
 }
 
-function panelHTML(t, aqi, p25, p10, no2, o3, so2, co) {
-  const d = new Date(t);
-  const when = d.toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+function panelHTML(t, aqi, p25, p10, no2, o3, so2, co, lat, lon) {
+  const d = t ? new Date(t) : null;
+  const when = d ? d.toLocaleString('es-CO', { timeZone: 'America/Bogota' }) : '-';
   return `<strong>US AQI:</strong> ${aqi ?? '-'} (${aqiCategory(aqi)})<br>
           <strong>PM2.5:</strong> ${fmt(p25)} µg/m³<br>
           <strong>PM10:</strong> ${fmt(p10)} µg/m³<br>
@@ -63,7 +55,8 @@ function panelHTML(t, aqi, p25, p10, no2, o3, so2, co) {
           <strong>O₃:</strong> ${fmt(o3)} µg/m³<br>
           <strong>SO₂:</strong> ${fmt(so2)} µg/m³<br>
           <strong>CO:</strong> ${fmt(co)} µg/m³<br>
-          <span class="soft">Hora: ${when}</span>`;
+          <span class="soft">Hora: ${when}</span><br>
+          <span class="soft">Punto: ${fmt(lat,5)}, ${fmt(lon,5)}</span>`;
 }
 
 function addLegendAQI() {
@@ -84,30 +77,51 @@ function addLegendAQI() {
   legend.addTo(map);
 }
 
-let marker;
+async function loadArea() {
+  const r = await fetch('./capas/Sector_Villa_Anny_II.json');
+  if (!r.ok) throw new Error('No se pudo cargar el polígono del área');
+  return r.json();
+}
+
+let marker, areaLayer;
+
+async function updateAt(lat, lon) {
+  const data = await loadOpenMeteoAQ(lat, lon);
+  const h = data.hourly || {};
+  const idx = latestIndex(h.time || []);
+  const aqi = h.us_aqi ? h.us_aqi[idx] : null;
+  const p25 = h.pm2_5 ? h.pm2_5[idx] : null;
+  const p10 = h.pm10 ? h.pm10[idx] : null;
+  const no2 = h.nitrogen_dioxide ? h.nitrogen_dioxide[idx] : null;
+  const o3  = h.ozone ? h.ozone[idx] : null;
+  const so2 = h.sulphur_dioxide ? h.sulphur_dioxide[idx] : null;
+  const co  = h.carbon_monoxide ? h.carbon_monoxide[idx] : null;
+  const t   = (h.time && h.time[idx]) ? h.time[idx] : null;
+  const color = aqiColor(aqi);
+  if (marker) map.removeLayer(marker);
+  marker = L.circleMarker([lat, lon], { radius: 18, color: '#222', weight: 1, fillColor: color, fillOpacity: 0.95 }).addTo(map);
+  const html = panelHTML(t, aqi, p25, p10, no2, o3, so2, co, lat, lon);
+  setInfo(html);
+  marker.bindPopup(`<div style="min-width:220px">${html}</div>`);
+}
 
 (async function bootstrap(){
   try {
-    const lat = 4.6050257972928375, lon = -74.20169397856526;
-    const data = await loadOpenMeteoAQ(lat, lon);
-    const h = data.hourly || {};
-    const idx = latestIndex(h.time || []);
-    const aqi = h.us_aqi ? h.us_aqi[idx] : null;
-    const p25 = h.pm2_5 ? h.pm2_5[idx] : null;
-    const p10 = h.pm10 ? h.pm10[idx] : null;
-    const no2 = h.nitrogen_dioxide ? h.nitrogen_dioxide[idx] : null;
-    const o3  = h.ozone ? h.ozone[idx] : null;
-    const so2 = h.sulphur_dioxide ? h.sulphur_dioxide[idx] : null;
-    const co  = h.carbon_monoxide ? h.carbon_monoxide[idx] : null;
-    const t   = (h.time && h.time[idx]) ? h.time[idx] : null;
-
-    const color = aqiColor(aqi);
-    if (marker) map.removeLayer(marker);
-    marker = L.circleMarker([lat, lon], { radius: 18, color: '#222', weight: 1, fillColor: color, fillOpacity: 0.95 }).addTo(map);
-    const html = panelHTML(t, aqi, p25, p10, no2, o3, so2, co);
-    setInfo(html);
-    marker.bindPopup(`<div style="min-width:220px">${html}</div>`);
+    let lat = 4.6050257972928375, lon = -74.20169397856526;
+    try {
+      const area = await loadArea();
+      areaLayer = L.geoJSON(area, { style: { color:'#333', weight:2, fillColor:'#5dade2', fillOpacity:0.12 } }).addTo(map);
+      const b = areaLayer.getBounds();
+      if (b.isValid()) map.fitBounds(b.pad(0.05));
+      const centroid = turf.centroid(area);
+      if (centroid && centroid.geometry && centroid.geometry.coordinates) {
+        lon = centroid.geometry.coordinates[0];
+        lat = centroid.geometry.coordinates[1];
+      }
+    } catch (e) {}
+    await updateAt(lat, lon);
     addLegendAQI();
+    map.on('click', async (e) => { await updateAt(e.latlng.lat, e.latlng.lng); });
   } catch (e) {
     console.error(e);
     setInfo('No se pudo cargar la calidad del aire. Reintenta.');
