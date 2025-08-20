@@ -1,0 +1,47 @@
+/* NAVBAR: sin viñetas + horizontal */
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 32px;
+  margin: 0;
+  padding: 10px 0;
+}
+.navbar li { margin: 0; }
+.navbar a { text-decoration: none; font-weight: bold; color: #333; font-size: 18px; }
+.navbar a:hover { color: #0a7d47; }
+.navbar a.active { background: #3cb371; color: #fff; padding: 6px 10px; border-radius: 8px; }
+
+/* HEADER de sección (evita el absolute del <header> principal) */
+.page-header {
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+}
+.page-header h2 {
+  margin: 0 0 6px;
+  font-size: 2rem;
+  color: #333;
+}
+
+/* CATÁSTRO 3D: integrar visor al layout */
+.catastro3d .toolbar{
+  position: relative;
+  display: inline-block;
+  margin: 12px 16px 0 16px;
+  background: #fff;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.10);
+  font-size: 14px;
+}
+.catastro3d #cesiumContainer{
+  width: 97%;
+  height: 620px;          /* ajusta a gusto */
+  min-height: 520px;
+  margin: 10px 16px 16px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.10);
+  background: #f0f0f0;
+}

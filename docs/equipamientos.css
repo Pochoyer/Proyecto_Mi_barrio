@@ -1,0 +1,45 @@
+/* Estilos específicos de la sección Equipamientos */
+.leyenda{
+  position:absolute;
+  z-index:500;
+  right:20px;
+  top:20px;
+  background:#fff;
+  padding:8px 10px;
+  border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+  font-size:13px;
+  line-height:1.35;
+}
+
+.chip{
+  display:inline-block;
+  width:12px; height:12px;
+  border-radius:2px;
+  margin-right:6px;
+  vertical-align:middle;
+}
+.chip-poligono{ background:#3388ff; }
+.chip-parque{ background:#2e7d32; }
+
+/* Tarjetas y botón que ya tenías */
+.equipamientos .card{
+  border:1px solid var(--ring, #cbd5e1);
+  border-radius:12px;
+  padding:14px;
+  background:rgba(2,6,23,.45);
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.equipamientos .card:hover{
+  transform:translateY(-2px);
+  border-color:var(--primary, #06b6d4);
+  box-shadow:0 10px 24px rgba(34,211,238,.18);
+}
+.btn{
+  display:inline-flex; gap:8px; align-items:center; justify-content:center;
+  padding:10px 14px; border-radius:999px; border:1px solid transparent;
+  background:linear-gradient(180deg, var(--primary, #06b6d4), var(--primary-2, #0891b2));
+  color:#061118; font-weight:600; cursor:pointer;
+}
+.btn:focus{ outline:2px solid var(--primary, #06b6d4); outline-offset:2px; }
+.btn:active{ transform:translateY(1px); }

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Catastro 3D | Proyecto Mi Barrio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="estilos.css" />
+  <!-- Estilos específicos de esta sección -->
+  <link rel="stylesheet" href="catastro3d.css" />
+
+  <!-- Cesium 1.132 -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.132/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.132/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+
+  <script>
+    /* Pega aquí tu token Ion si usas terreno/imagery de Ion */
+    Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZjFiZTg0Mi1kMGE5LTQxZTItOTQ2NC04MzFjODE4Mjg2YzMiLCJpZCI6MzMxMzcyLCJpYXQiOjE3NTUwNDI2MDF9.bp9w8UGT5gU4rtUWaOjeTWJjjj1asVfDnexcz2e2G34";
+  </script>
+</head>
+<body>
+  <div class="pagina">
+    <header>
+      <a href="index.html"><img src="imagenes/Logo.png" alt="Logo"></a>
+      <h1>Catastro 3D: Villa Anny II</h1>
+    </header>
+
+    <!-- NAV igual que index.html (marca activo) -->
+    <nav class="navbar">
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="equipamientos.html">Equipamientos</a></li>
+        <li><a href="movilidad.html">Movilidad</a></li>
+        <li><a href="problematicas.html">Problemáticas</a></li>
+        <li><a href="acercade.html">Acerca de</a></li>
+        <li><a class="active" href="catastro3d.html">Catastro 3D</a></li>
+      </ul>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <main class="catastro3d">
+      <section class="page-header">
+        <h2>Catastro 3D</h2>
+        <p>Extrusión de polígonos: <strong>3 m por piso</strong> según el GeoJSON del Barrio Villa Anny II.</p>
+      </section>
+      <div id="cesiumContainer"></div>
+    </main>
+
+    <footer>
+      <small>&copy; 2025 Proyecto Mi Barrio — Villa Anny II</small>
+    </footer>
+  </div>
+
+  <!-- Tu lógica (asegúrate que usa el contenedor "cesiumContainer") -->
+  <script src="catastro3d.js"></script>
+</body>
+</html>

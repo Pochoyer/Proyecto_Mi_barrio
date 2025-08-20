@@ -1,3 +1,4 @@
+
 // Inicializar mapa centrado en Bogotá
 const mapa = L.map('mapa').setView([4.711, -74.0721], 12); // Zoom más alto
 
@@ -24,3 +25,4 @@ fetch('capas/Sector_Villa_Anny_II.json')
         capaGeoJSON.bindPopup("Villa Anny II");
     })
     .catch(err => console.error("Error cargando el GeoJSON:", err));
+>>>>>>> origin/master
