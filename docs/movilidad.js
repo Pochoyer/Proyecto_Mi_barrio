@@ -14,58 +14,27 @@ function showImage(src) { if (!src) { imgWrap.style.display = 'none'; infoImg.re
 const PARADERO_IMG_DIR = 'imagenes/paraderos/';
 const PARADERO_DEFAULT_IMG = 'imagenes/paradero_info.png';
 const PARADERO_IMG_MAP = {
-  'Paradero 1': `${PARADERO_IMG_DIR}Paradero 1.jpg`,
-  'Paradero 2': `${PARADERO_IMG_DIR}Paradero 2.jpg`,
-  'Br. Villa Anny I y II': `${PARADERO_IMG_DIR}Paradero 1.jpg`,
-  'Br. Villa Anny I': `${PARADERO_IMG_DIR}Paradero 2.jpg`,
-  '488A09': `${PARADERO_IMG_DIR}Paradero 1.jpg`,
-  '168A09': `${PARADERO_IMG_DIR}Paradero 2.jpg`
+  'Paradero 1': `${PARADERO_IMG_DIR}Paradero 1.png`,
+  'Paradero 2': `${PARADERO_IMG_DIR}Paradero 2.png`,
+  'Br. Villa Anny I y II': `${PARADERO_IMG_DIR}Paradero 1.png`,
+  'Br. Villa Anny I': `${PARADERO_IMG_DIR}Paradero 2.png`,
+  '488A09': `${PARADERO_IMG_DIR}Paradero 1.png`,
+  '168A09': `${PARADERO_IMG_DIR}Paradero 2.png`
 };
 
 async function loadJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(`No se pudo cargar ${url}`); return r.json(); }
 
 function tipoViaLargo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'DG') return 'Diagonal'; if (s === 'KR') return 'Carrera'; if (s === 'CL') return 'Calle'; if (s === 'TV') return 'Transversal'; return s || '-'; }
-function colorPorSigla(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'DG') return '#1f77b4'; if (s === 'KR') return '#2ca02c'; if (s === 'CL') return '#ff7f0e'; if (s === 'TV') return '#9467bd'; return '#7f7f7f'; }
 
-function viaInfoHTML(p) {
-  const etiqueta = p.MVIEtiquet ?? '-';
-  const tipo = tipoViaLargo(p.MVITipo);
-  const clase = p.MVITCla ?? '-';
-  const vel = p.MVIVelReg ?? '-';
-  const calz = p.MVINumC ?? '-';
-  const codigo = p.MVICodigo ?? '-';
-  return `<strong>${etiqueta}</strong><br>Tipo: ${tipo}<br>Clase: ${clase}<br>Vel. regl.: ${vel} km/h<br>Calzadas: ${calz}<br>Código: ${codigo}`;
-}
+function weightFromClass(p) { const c = Number(p.MVITCla); if (Number.isNaN(c)) return 4; if (c <= 1) return 7; if (c <= 2) return 5.5; if (c <= 3) return 4; if (c <= 4) return 3; return 2; }
 
-function styleViasFeature(feat) {
-  const p = feat.properties || {};
-  const estado = (p.estado || '').toString().toLowerCase();
-  return { pane: 'viasPane', color: colorPorSigla(p.MVITipo), weight: 4, opacity: 0.9, dashArray: estado === 'proyectada' ? '6,6' : null };
-}
+function viaInfoHTML(p) { const etiqueta = p.MVIEtiquet ?? '-'; const tipo = tipoViaLargo(p.MVITipo); const clase = p.MVITCla ?? '-'; const vel = p.MVIVelReg ?? '-'; const calz = p.MVINumC ?? '-'; const codigo = p.MVICodigo ?? '-'; return `<strong>${etiqueta}</strong><br>Tipo: ${tipo}<br>Clase: ${clase}<br>Vel. regl.: ${vel} km/h<br>Calzadas: ${calz}<br>Código: ${codigo}`; }
 
-function guessParaderoImg(p) {
-  const direct = p.imagen || p.image || p.image_url || p.foto || p.FOTO || null;
-  if (direct) return direct;
-  const nombre = p.nombre_par || p.nombre || p.name;
-  if (nombre && PARADERO_IMG_MAP[nombre]) return PARADERO_IMG_MAP[nombre];
-  const cenefa = p.cenefa;
-  if (cenefa && PARADERO_IMG_MAP[cenefa]) return PARADERO_IMG_MAP[cenefa];
-  if (cenefa) return `${PARADERO_IMG_DIR}${cenefa}.jpg`;
-  const consec = p.consec_par || p.codigo || p.code;
-  if (consec) return `${PARADERO_IMG_DIR}${consec}.jpg`;
-  return PARADERO_DEFAULT_IMG;
-}
+function styleViasFeature(feat) { const p = feat.properties || {}; const estado = (p.estado || '').toString().toLowerCase(); return { pane: 'viasPane', color: '#ff0000', weight: weightFromClass(p), opacity: 0.95, dashArray: estado === 'proyectada' ? '6,6' : null }; }
 
-function paraderoInfoHTML(p) {
-  const nombre = p.nombre_par ?? p.nombre ?? p.name ?? 'Paradero';
-  const via = p.via_par ?? '-';
-  const dir = p.direcc_par ?? '-';
-  const cenefa = p.cenefa ?? '-';
-  const consec = p.consec_par ?? '-';
-  const modulo = p.modulo_par ?? '-';
-  const zona = p.zona_par ?? '-';
-  return `<strong>${nombre}</strong><br>Vía: ${via}<br>Dirección: ${dir}<br>Cenefa: ${cenefa}<br>Código: ${consec}<br>Módulo: ${modulo}<br>Zona: ${zona}`;
-}
+function guessParaderoImg(p) { const direct = p.imagen || p.image || p.image_url || p.foto || p.FOTO || null; if (direct) return direct; const nombre = p.nombre_par || p.nombre || p.name; if (nombre && PARADERO_IMG_MAP[nombre]) return PARADERO_IMG_MAP[nombre]; const cenefa = p.cenefa; if (cenefa && PARADERO_IMG_MAP[cenefa]) return PARADERO_IMG_MAP[cenefa]; if (cenefa) return `${PARADERO_IMG_DIR}${cenefa}.png`; const consec = p.consec_par || p.codigo || p.code; if (consec) return `${PARADERO_IMG_DIR}${consec}.png`; return PARADERO_DEFAULT_IMG; }
+
+function paraderoInfoHTML(p) { const nombre = p.nombre_par ?? p.nombre ?? p.name ?? 'Paradero'; const via = p.via_par ?? '-'; const dir = p.direcc_par ?? '-'; const cenefa = p.cenefa ?? '-'; const consec = p.consec_par ?? '-'; const modulo = p.modulo_par ?? '-'; const zona = p.zona_par ?? '-'; return `<strong>${nombre}</strong><br>Vía: ${via}<br>Dirección: ${dir}<br>Cenefa: ${cenefa}<br>Código: ${consec}<br>Módulo: ${modulo}<br>Zona: ${zona}`; }
 
 function paraderoPopupHTML(p, imgUrl) { const core = paraderoInfoHTML(p); const img = imgUrl ? `<img src="${encodeURI(imgUrl)}" style="max-width:220px; display:block; margin-top:8px; border:1px solid #ddd; border-radius:6px;" alt="Paradero"/>` : ''; return `${core}${img}`; }
 
@@ -80,9 +49,9 @@ let viasLayer, paraderosLayer;
       style: styleViasFeature,
       onEachFeature: (feat, layer) => {
         const p = feat.properties || {};
-        layer.bindTooltip(() => viaInfoHTML(p), { sticky: true, direction: 'top', opacity: 0.9 });
+        layer.bindTooltip(() => viaInfoHTML(p), { sticky: true, direction: 'top', opacity: 0.95 });
         layer.on({
-          mouseover: () => { layer.setStyle({ weight: (layer.options.weight || 4) + 2 }); layer.bringToFront(); setInfo(viaInfoHTML(p)); showImage(null); },
+          mouseover: () => { layer.setStyle({ weight: weightFromClass(p) + 2 }); layer.bringToFront(); setInfo(viaInfoHTML(p)); showImage(null); },
           mouseout: () => { layer.setStyle(styleViasFeature(feat)); setInfo('Acerca el cursor a una vía o haz clic en un paradero…'); },
           click: (e) => { L.popup().setLatLng(e.latlng).setContent(viaInfoHTML(p)).openOn(map); }
         });
