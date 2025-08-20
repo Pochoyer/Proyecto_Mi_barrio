@@ -533,7 +533,7 @@ function ensureDebugDot(){
 
   // Opción B: usar logo personalizado
   moverEntity.billboard = new Cesium.BillboardGraphics({
-    image: "imagenes/logo.png",   // pon aquí la ruta a tu logo
+    image: "imagenes/Logo.png",   // pon aquí la ruta a tu logo
     scale: 0.06,
     verticalOrigin: Cesium.VerticalOrigin.BOTTOM
   });
