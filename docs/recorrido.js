@@ -71,7 +71,7 @@ let startTime, stopTime, sampledPos;
 
   } catch (err) {
     console.error("Error al iniciar:", err);
-    alert("No se pudo iniciar Cesium. Revisa token/conexión.");
+    alert("Fallo al iniciar Cesium:\n" + (err?.message || String(err)));
   }
 })();
 
@@ -91,22 +91,28 @@ async function initRoute(){
     Cesium.Cartesian3.fromRadians(c.longitude, c.latitude, Math.max(c.height||0, 10))
   );
 
-  // D) dibujar polilínea (sin clampToGround para evitar rarezas)
+  // D) dibujar polilínea (sin clampToGround porque ya tienes alturas)
   if (routeEntity) viewer.entities.remove(routeEntity);
   routeEntity = viewer.entities.add({
-    name: "Ruta",
-    polyline: {
-      positions: routePositionsCartesian,
-      width: 3,
-      clampToGround: false,
-      material: new Cesium.PolylineGlowMaterialProperty({ glowPower: 0.2, taperPower: 0.5 })
-    }
-  });
+  name: "Ruta",
+  polyline: {
+    positions: routePositionsCartesian,
+    width: 2,
+    clampToGround: false,
+    material: Cesium.Color.YELLOW.withAlpha(0.0)   // transparente
+  }
+});
 
   // E) longitud y animación inicial
   routeLengthMeters = pathLengthMeters(routePositionsCartesian);
-  rebuildWithSpeed();
-  viewer.zoomTo(routeEntity);
+  //rebuildWithSpeed();
+  viewer.flyTo(routeEntity, {
+  offset: new Cesium.HeadingPitchRange(
+    viewer.scene.camera.heading, 
+    Cesium.Math.toRadians(-20),  // inclinación (más negativo = más arriba)
+    1000                          // distancia (ajústalo a tu gusto)
+  )
+});
 }
 
 function rebuildWithSpeed(){
@@ -129,8 +135,8 @@ function rebuildWithSpeed(){
 
   for (let i=0;i<routePositionsCartesian.length;i++){
     const t = (cum[i]/total) * totalSec;
-    const time = Cesium.JulianDate.addSeconds(startTime, t, new Cesium.JulianDate());
-    property.addSample(time, routePositionsCartesian[i]);
+    const when = Cesium.JulianDate.addSeconds(startTime, t, new Cesium.JulianDate());
+    property.addSample(when, routePositionsCartesian[i]);
   }
   sampledPos = property;
 
@@ -150,7 +156,6 @@ function rebuildWithSpeed(){
     },
     path: {
       resolution: 1,
-      // Material simple para evitar problemas con .update
       material: Cesium.Color.CYAN.withAlpha(0.6),
       width: 3,
       leadTime: 0,
@@ -170,14 +175,53 @@ function rebuildWithSpeed(){
   totalLengthEl.textContent = fmtMeters(routeLengthMeters);
   totalTimeEl.textContent   = fmtDuration(Cesium.JulianDate.secondsDifference(stopTime, startTime));
 
+  // Seguimiento y “play”
   applyFollowCamera();
+  viewer.clock.shouldAnimate = false;
+  // ====== VALIDADORES ======
+  ensureDebugDot();
+  hookTickLogger();
+  debugStatus('rebuildWithSpeed:end');
 }
 
+// ============ CÁMARA: seguir al dron con ángulo agradable ============
 function applyFollowCamera(){
-  if (!viewer) return;
-  viewer.trackedEntity = (followCheckbox?.checked && moverEntity) ? moverEntity : undefined;
+  if (!viewer || !moverEntity) return;
+
+  if (followCheckbox?.checked) {
+    viewer.trackedEntity = moverEntity;
+    console.log('tracking set to moverEntity:', moverEntity.id || '(sin id)');
+
+    viewer.scene.camera.setView({
+      orientation: {
+        heading: viewer.scene.camera.heading,
+        pitch: Cesium.Math.toRadians(-25),
+        roll: 0
+      }
+    });
+
+    if (!applyFollowCamera.__nudgeOnce) {
+      applyFollowCamera.__nudgeOnce = true;
+      const pos = moverEntity.position.getValue(viewer.clock.currentTime);
+      if (pos) {
+        const hpRange = new Cesium.HeadingPitchRange(
+          viewer.scene.camera.heading,
+          Cesium.Math.toRadians(-25),
+          120
+        );
+        viewer.scene.camera.lookAt(pos, hpRange);
+        viewer.scene.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+      }
+    }
+  } else {
+    viewer.trackedEntity = undefined;
+    viewer.scene.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  }
+
+  debugStatus('applyFollowCamera');
 }
 
+// ===================== Eventos UI =====================
 function wireUI(){
   playBtn?.addEventListener("click", () => {
     viewer.clock.shouldAnimate = true;
@@ -193,4 +237,45 @@ function wireUI(){
   });
   speedInput?.addEventListener("change", rebuildWithSpeed);
   followCheckbox?.addEventListener("change", applyFollowCamera);
+}
+// ====== VALIDADORES ======
+function debugStatus(where){
+  try{
+    const t = viewer?.clock?.currentTime;
+    const p = sampledPos?.getValue?.(t);
+    console.log(`[${where}]`,
+      'tracked=', !!viewer?.trackedEntity,
+      'animate=', !!viewer?.clock?.shouldAnimate,
+      'mover=', !!moverEntity,
+      'sample=', !!p,
+      'time=', t ? Cesium.JulianDate.toDate(t).toLocaleTimeString() : '—'
+    );
+  }catch(e){ console.warn('debugStatus err', e); }
+}
+
+function ensureDebugDot(){
+  if (!moverEntity) return;
+
+  // Opción A: ocultar punto
+  // moverEntity.point = new Cesium.PointGraphics({ pixelSize: 0 });
+
+  // Opción B: usar logo personalizado
+  moverEntity.billboard = new Cesium.BillboardGraphics({
+    image: "imagenes/logo.png",   // pon aquí la ruta a tu logo
+    scale: 0.06,
+    verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+  });
+}
+
+function hookTickLogger(){
+  if (window.__tickLogger) return;
+  window.__tickLogger = true;
+  viewer.clock.onTick.addEventListener(()=>{
+    if (!sampledPos) return;
+    const p = sampledPos.getValue(viewer.clock.currentTime);
+    if (p){
+      const c = Cesium.Cartographic.fromCartesian(p);
+      console.log('pos=', Cesium.Math.toDegrees(c.longitude).toFixed(5)+','+Cesium.Math.toDegrees(c.latitude).toFixed(5));
+    }
+  });
 }
