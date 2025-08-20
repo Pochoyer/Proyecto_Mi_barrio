@@ -1,13 +1,13 @@
 // docs/catastro3d.js
 
 // --- Configuración ---
-const GEOJSON_URL = "capas/Villa_Anny_II.geojson";
+const GEOJSON_URL = "capas/Const_Villa_Anny_II.json";
 const METERS_PER_FLOOR = 3;
 const PADDING_METERS = 1000; // 👈 margen real alrededor del barrio
 
 // Claves posibles del número de pisos (ajusta si sabes el nombre exacto)
 const FLOOR_KEYS = [
-  "pisos", "Pisos", "NUM_PISOS", "N_PISOS", "num_pisos", "n_pisos", "pisos_totales"
+  "CONELEVACI","pisos", "Pisos", "NUM_PISOS", "N_PISOS", "num_pisos", "n_pisos", "pisos_totales"
 ];
 
 // --- Viewer: terreno mundial + satélite ArcGIS ---

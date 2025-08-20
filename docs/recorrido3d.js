@@ -2,7 +2,7 @@
 
 // ===== Config =====
 const CATASTRO_URL     = "capas/Villa_Anny_II.geojson";
-const ROUTE_URL        = "rutas/recorrido_villa_anny.geojson";
+const ROUTE_URL        = "capas/recorrido_villa_anny.geojson";
 
 const USE_ION_TERRAIN  = false;   // ← cambia a true si usarás terreno Ion (requiere token en el HTML)
 const METERS_PER_FLOOR = 3;
@@ -25,17 +25,28 @@ const err  = (...a)=>console.error("[Recorrido3D]", ...a);
 })();
 
 // ===== Viewer =====
+// ===== Asegurar altura del contenedor =====
+(() => {
+  const el = document.getElementById("cesiumContainer");
+  if (el && el.clientHeight < 200) {
+    el.style.height = "70vh";
+    el.style.minHeight = "560px";
+  }
+})();
+
+// ===== Viewer =====
 const terrainProvider = USE_ION_TERRAIN
   ? Cesium.Terrain.fromWorldTerrain()
   : new Cesium.EllipsoidTerrainProvider();
 
+// ⬇️ Usa imageryProvider con OSM para evitar el 404 de ArcGIS
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: terrainProvider,
-  baseLayer: Cesium.ImageryLayer.fromProviderAsync(
-    Cesium.ArcGisMapServerImageryProvider.fromBasemapType(
-      Cesium.ArcGisBaseMapType.SATELLITE
-    )
-  ),
+  imageryProvider: new Cesium.UrlTemplateImageryProvider({
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    credit: "© OpenStreetMap contributors"
+  }),
+  // (no uses baseLayer aquí)
   timeline: true,
   animation: true,
   sceneModePicker: true,
@@ -49,6 +60,7 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 });
 viewer.scene.globe.depthTestAgainstTerrain = true;
 viewer.scene.backgroundColor = Cesium.Color.fromCssColorString("#f0f0f0");
+
 
 // ===== Utils =====
 function readFloors(bag, now){
