@@ -11,7 +11,7 @@ const infoImg = document.getElementById('info-img');
 function setInfo(html) { infoBox.innerHTML = html; }
 function showImage(src) { if (!src) { imgWrap.style.display = 'none'; infoImg.removeAttribute('src'); return; } infoImg.src = encodeURI(src); imgWrap.style.display = 'block'; }
 
-const PARADERO_IMG_DIR = 'imagenes/paraderos/';
+const PARADERO_IMG_DIR = 'imagenes/Paraderos/';
 const PARADERO_IMG_MAP = {
   'Paradero 1': `${PARADERO_IMG_DIR}Paradero_1.png`,
   'Paradero 2': `${PARADERO_IMG_DIR}Paradero_2.png`,
