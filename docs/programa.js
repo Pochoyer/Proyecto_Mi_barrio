@@ -25,4 +25,3 @@ fetch('capas/Sector_Villa_Anny_II.json')
         capaGeoJSON.bindPopup("Villa Anny II");
     })
     .catch(err => console.error("Error cargando el GeoJSON:", err));
->>>>>>> origin/master
