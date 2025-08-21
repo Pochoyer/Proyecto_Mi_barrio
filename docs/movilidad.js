@@ -12,14 +12,13 @@ function setInfo(html) { infoBox.innerHTML = html; }
 function showImage(src) { if (!src) { imgWrap.style.display = 'none'; infoImg.removeAttribute('src'); return; } infoImg.src = encodeURI(src); imgWrap.style.display = 'block'; }
 
 const PARADERO_IMG_DIR = 'imagenes/paraderos/';
-const PARADERO_DEFAULT_IMG = 'imagenes/paradero_info.png';
 const PARADERO_IMG_MAP = {
-  'Paradero 1': `${PARADERO_IMG_DIR}Paradero 1.png`,
-  'Paradero 2': `${PARADERO_IMG_DIR}Paradero 2.png`,
-  'Br. Villa Anny I y II': `${PARADERO_IMG_DIR}Paradero 1.png`,
-  'Br. Villa Anny I': `${PARADERO_IMG_DIR}Paradero 2.png`,
-  '488A09': `${PARADERO_IMG_DIR}Paradero 1.png`,
-  '168A09': `${PARADERO_IMG_DIR}Paradero 2.png`
+  'Paradero 1': `${PARADERO_IMG_DIR}Paradero_1.png`,
+  'Paradero 2': `${PARADERO_IMG_DIR}Paradero_2.png`,
+  'Br. Villa Anny I y II': `${PARADERO_IMG_DIR}Paradero_1.png`,
+  'Br. Villa Anny I': `${PARADERO_IMG_DIR}Paradero_2.png`,
+  '488A09': `${PARADERO_IMG_DIR}Paradero_1.png`,
+  '168A09': `${PARADERO_IMG_DIR}Paradero_2.png`
 };
 
 async function loadJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(`No se pudo cargar ${url}`); return r.json(); }
