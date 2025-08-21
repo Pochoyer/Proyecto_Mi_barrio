@@ -1,147 +1,122 @@
-/* =========================================
-   CONFIGURACIÓN DEL MAPA (Leaflet)
-   - Creación del mapa y vista inicial
-   - Capa base con OpenStreetMap
-   ========================================= */
-const map = L.map('map-mov').setView([4.61, -74.08], 15);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors',
-  maxZoom: 20
-}).addTo(map);
+const map = L.map('map-mov', { zoomControl: true }).setView([4.616, -74.1], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20, attribution: '&copy; OpenStreetMap' }).addTo(map);
 
+map.createPane('viasPane');      map.getPane('viasPane').style.zIndex = 410;
+map.createPane('paraderosPane'); map.getPane('paraderosPane').style.zIndex = 430;
 
-/* =========================================
-   REFERENCIAS DE UI
-   - Elementos del panel informativo
-   - Checkboxes para filtros por tipo de vía
-   ========================================= */
-const infoEl  = document.getElementById('info-mov');
+const infoBox = document.getElementById('info-mov');
 const imgWrap = document.getElementById('info-img-wrap');
-const imgEl   = document.getElementById('info-img');
-const filtros = document.querySelectorAll('.filters input[type="checkbox"]');
+const infoImg = document.getElementById('info-img');
 
+function setInfo(html) { infoBox.innerHTML = html; }
+function showImage(src) { if (!src) { imgWrap.style.display = 'none'; infoImg.removeAttribute('src'); return; } infoImg.src = encodeURI(src); imgWrap.style.display = 'block'; }
 
-/* =========================================
-   CAPAS POR TIPO DE VÍA
-   - Grupos: KR, CL, DG, TV
-   - Permiten mostrar/ocultar por filtro
-   ========================================= */
-const capasPorTipo = {
-  KR: L.layerGroup().addTo(map),
-  CL: L.layerGroup().addTo(map),
-  DG: L.layerGroup().addTo(map),
-  TV: L.layerGroup().addTo(map)
+const PARADERO_IMG_DIR = 'imagenes/paraderos/';
+const PARADERO_DEFAULT_IMG = 'imagenes/paradero_info.png';
+const PARADERO_IMG_MAP = {
+  'Paradero 1': `${PARADERO_IMG_DIR}Paradero 1.png`,
+  'Paradero 2': `${PARADERO_IMG_DIR}Paradero 2.png`,
+  'Br. Villa Anny I y II': `${PARADERO_IMG_DIR}Paradero 1.png`,
+  'Br. Villa Anny I': `${PARADERO_IMG_DIR}Paradero 2.png`,
+  '488A09': `${PARADERO_IMG_DIR}Paradero 1.png`,
+  '168A09': `${PARADERO_IMG_DIR}Paradero 2.png`
 };
 
+async function loadJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(`No se pudo cargar ${url}`); return r.json(); }
 
-/* =========================================
-   ESTILO Y TEXTO DE INFO
-   - Estilo de líneas (color/opacity/weight)
-   - Formateo de texto para el panel
-   ========================================= */
-function estiloVia(feature) {
-  const clase = Number(feature.properties?.clase ?? 1);
-  const opacity = Math.max(0.25, 1 - (clase - 1) * 0.15);
-  return { color: '#ff0000', weight: 3, opacity };
-}
+function tipoViaLargo(sigla) { const s = (sigla || '').toString().toUpperCase(); if (s === 'DG') return 'Diagonal'; if (s === 'KR') return 'Carrera'; if (s === 'CL') return 'Calle'; if (s === 'TV') return 'Transversal'; return s || '-'; }
 
-function textoInfo(feature) {
-  const { nombre, tipo, clase, longitud } = feature.properties ?? {};
-  return [
-    nombre ? `<b>${nombre}</b>` : '',
-    tipo ? `Tipo: ${tipo}` : '',
-    clase ? `Clase: ${clase}` : '',
-    longitud ? `Longitud: ${longitud} m` : ''
-  ].filter(Boolean).join(' · ');
-}
+function classValue(p) { const c = Number(p.MVITCla); return Number.isNaN(c) ? 3 : Math.max(1, Math.min(5, Math.round(c))); }
+function redShadeByClass(c) { if (c <= 1) return '#ff0000'; if (c === 2) return '#ff3333'; if (c === 3) return '#ff6666'; if (c === 4) return '#ff9999'; return '#ffcccc'; }
+function weightFromClass(p) { const c = classValue(p); if (c === 1) return 8; if (c === 2) return 6; if (c === 3) return 3; if (c === 4) return 2; return 1; }
 
+function viaInfoHTML(p) { const etiqueta = p.MVIEtiquet ?? '-'; const tipo = tipoViaLargo(p.MVITipo); const clase = p.MVITCla ?? '-'; const vel = p.MVIVelReg ?? '-'; const calz = p.MVINumC ?? '-'; const codigo = p.MVICodigo ?? '-'; return `<strong>${etiqueta}</strong><br>Tipo: ${tipo}<br>Clase: ${clase}<br>Vel. regl.: ${vel} km/h<br>Calzadas: ${calz}<br>Código: ${codigo}`; }
 
-/* =========================================
-   INTERACCIÓN CON GEOMETRÍAS
-   - mouseover: resalta y muestra info
-   - mouseout: restaura y ayuda default
-   - click: fija info y muestra imagen
-   ========================================= */
-function onOver(e) {
-  e.target.setStyle({ weight: 5 });
-  infoEl.innerHTML = textoInfo(e.target.feature) || 'Vía sin metadatos';
-}
-function onOut(e) {
-  e.target.setStyle({ weight: 3 });
-  if (!infoEl.dataset.sticky) {
-    infoEl.textContent = 'Acerca el cursor a una vía o haz clic en un paradero…';
-  }
-}
-function onClick(e) {
-  const f = e.target.feature;
-  infoEl.innerHTML = textoInfo(f) || 'Vía sin metadatos';
-  infoEl.dataset.sticky = '1';
-  const imgUrl = f?.properties?.imagen;
-  if (imgUrl) {
-    imgEl.src = imgUrl;
-    imgWrap.style.display = 'block';
-  } else {
-    imgWrap.style.display = 'none';
-  }
-}
-// Quita “sticky” al clicar fuera de una vía
-map.on('click', () => {
-  delete infoEl.dataset.sticky;
-  imgWrap.style.display = 'none';
-});
+function styleViasFeature(feat) { const p = feat.properties || {}; const c = classValue(p); const color = redShadeByClass(c); const esProj = ((p.estado || '').toString().toLowerCase() === 'proyectada'); const dash = esProj ? '6,6' : null; return { color, weight: weightFromClass(p), opacity: 0.98, dashArray: dash, lineCap: 'butt' }; }
 
+function guessParaderoImg(p) { const direct = p.imagen || p.image || p.image_url || p.foto || p.FOTO || null; if (direct) return direct; const nombre = p.nombre_par || p.nombre || p.name; if (nombre && PARADERO_IMG_MAP[nombre]) return PARADERO_IMG_MAP[nombre]; const cenefa = p.cenefa; if (cenefa && PARADERO_IMG_MAP[cenefa]) return PARADERO_IMG_MAP[cenefa]; if (cenefa) return `${PARADERO_IMG_DIR}${cenefa}.png`; const consec = p.consec_par || p.codigo || p.code; if (consec) return `${PARADERO_IMG_DIR}${consec}.png`; return PARADERO_DEFAULT_IMG; }
 
-/* =========================================
-   CARGA Y DISTRIBUCIÓN DE DATOS
-   - Carga GeoJSON (ajusta la ruta)
-   - Enruta cada feature a su grupo (tipo)
-   - Enlaza eventos de interacción
-   ========================================= */
-fetch('vias.geojson') // <-- AJUSTA ruta a tu dataset
-  .then(r => r.json())
-  .then(geojson => {
-    L.geoJSON(geojson, {
-      style: estiloVia,
-      onEachFeature: (feature, layer) => {
-        layer.on({ mouseover: onOver, mouseout: onOut, click: onClick });
-        const tipo = (feature.properties?.tipo || '').toUpperCase();
-        if (capasPorTipo[tipo]) capasPorTipo[tipo].addLayer(layer);
-      }
-    });
-  })
-  .catch(() => {
-    infoEl.textContent = 'No se pudieron cargar las vías.';
-  });
+function paraderoInfoHTML(p) { const nombre = p.nombre_par ?? p.nombre ?? p.name ?? 'Paradero'; const via = p.via_par ?? '-'; const dir = p.direcc_par ?? '-'; const cenefa = p.cenefa ?? '-'; const consec = p.consec_par ?? '-'; const modulo = p.modulo_par ?? '-'; const zona = p.zona_par ?? '-'; return `<strong>${nombre}</strong><br>Vía: ${via}<br>Dirección: ${dir}<br>Cenefa: ${cenefa}<br>Código: ${consec}<br>Módulo: ${modulo}<br>Zona: ${zona}`; }
 
+function paraderoPopupHTML(p, imgUrl) { const core = paraderoInfoHTML(p); const img = imgUrl ? `<img src="${encodeURI(imgUrl)}" style="max-width:220px; display:block; margin-top:8px; border:1px solid #ddd; border-radius:6px;" alt="Paradero"/>` : ''; return `${core}${img}`; }
 
-/* =========================================
-  FILTROS DE VISIBILIDAD
-   - Mostrar/ocultar grupos por checkbox
-   ========================================= */
-filtros.forEach(chk => {
-  chk.addEventListener('change', () => {
-    const tipo = chk.dataset.tipo;
-    if (chk.checked) {
-      capasPorTipo[tipo]?.addTo(map);
-    } else {
-      capasPorTipo[tipo] && map.removeLayer(capasPorTipo[tipo]);
+function addLegendTipos() { const legend = L.control({ position: 'bottomright' }); legend.onAdd = function() { const div = L.DomUtil.create('div', 'legend'); div.innerHTML = `
+      <div><strong>Tipos de vía</strong></div>
+      <div class="row"><span class="swatch"></span> KR (Carrera)</div>
+      <div class="row"><span class="swatch"></span> CL (Calle)</div>
+      <div class="row"><span class="swatch"></span> DG (Diagonal)</div>
+      <div class="row"><span class="swatch"></span> TV (Transversal)</div>
+    `; return div; }; legend.addTo(map); }
+
+let viasLayer, paraderosLayer, viasData, paraderosData;
+const tiposActivos = new Set(['KR','CL','DG','TV']);
+
+function featurePasaFiltro(feat) { const t = (feat.properties?.MVITipo || '').toString().toUpperCase(); return tiposActivos.has(t); }
+
+function renderVias() {
+  if (viasLayer) map.removeLayer(viasLayer);
+  viasLayer = L.geoJSON(viasData, {
+    pane: 'viasPane',
+    filter: featurePasaFiltro,
+    style: styleViasFeature,
+    onEachFeature: (feat, layer) => {
+      const p = feat.properties || {};
+      layer.bindTooltip(() => viaInfoHTML(p), { sticky: true, direction: 'top', opacity: 0.98 });
+      layer.on({
+        mouseover: () => { layer.setStyle({ weight: weightFromClass(p) + 2 }); layer.bringToFront(); if (paraderosLayer) paraderosLayer.bringToFront(); setInfo(viaInfoHTML(p)); showImage(null); },
+        mouseout: () => { layer.setStyle(styleViasFeature(feat)); setInfo('Acerca el cursor a una vía o haz clic en un paradero…'); },
+        click: (e) => { L.popup().setLatLng(e.latlng).setContent(viaInfoHTML(p)).openOn(map); }
+      });
     }
+  }).addTo(map);
+  ajustarVista();
+}
+
+function ajustarVista() {
+  const capas = [];
+  if (viasLayer && viasLayer.getLayers().length) capas.push(viasLayer);
+  if (paraderosLayer && paraderosLayer.getLayers().length) capas.push(paraderosLayer);
+  if (!capas.length) return;
+  const group = L.featureGroup(capas);
+  if (group.getLayers().length) map.fitBounds(group.getBounds().pad(0.08), { animate: true });
+}
+
+(function prepararFiltros(){
+  document.querySelectorAll('input[type="checkbox"][data-tipo]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const t = cb.getAttribute('data-tipo');
+      if (cb.checked) tiposActivos.add(t); else tiposActivos.delete(t);
+      renderVias();
+    });
   });
-});
+})();
 
+(async function bootstrap() {
+  try {
+    viasData = await loadJSON('./datos/Vias_VA2.geojson');
+    paraderosData = await loadJSON('./datos/Paraderos_SITP.geojson');
 
-/* =========================================
-   LEYENDA 
-   - Control en esquina inferior derecha
-   - Explica color y regla de “clase”
-   ========================================= */
-const legend = L.control({ position: 'bottomright' });
-legend.onAdd = () => {
-  const div = L.DomUtil.create('div', 'legend');
-  div.innerHTML = `
-    <div class="row"><span class="swatch"></span><span>Vías (rojo)</span></div>
-    <div class="row"><span>Mayor clase = más claro</span></div>
-  `;
-  return div;
-};
-legend.addTo(map);
+    renderVias();
+
+    paraderosLayer = L.geoJSON(paraderosData, {
+      pane: 'paraderosPane',
+      pointToLayer: (feat, latlng) => L.circleMarker(latlng, { radius: 6, color: '#222', weight: 1, fillColor: '#ffd54f', fillOpacity: 0.95 }),
+      onEachFeature: (feat, layer) => {
+        const p = feat.properties || {};
+        const imgUrl = guessParaderoImg(p);
+        layer.on({
+          mouseover: () => { layer.setStyle({ radius: 8, weight: 2 }); setInfo(paraderoInfoHTML(p)); showImage(imgUrl); },
+          mouseout: () => { layer.setStyle({ radius: 6, weight: 1 }); },
+          click: (e) => { L.popup({ maxWidth: 280 }).setLatLng(e.latlng).setContent(paraderoPopupHTML(p, imgUrl)).openOn(map); }
+        });
+      }
+    }).addTo(map);
+
+    L.control.scale({ metric: true, imperial: false }).addTo(map);
+    addLegendTipos();
+    ajustarVista();
+  } catch (err) {
+    console.error(err);
+    setInfo('Error cargando datos. Revisa la consola del navegador.');
+  }
+})();

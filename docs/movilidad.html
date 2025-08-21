@@ -1,26 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!-- ==============================
-       METADATOS Y ASSETS
-       - Configuración responsive
-       - Título de la página
-       - Estilos de Leaflet (CDN)
-       - Estilos globales del sitio
-       ============================== -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Movilidad - Villa Anny II</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <link rel="stylesheet" href="estilos.css"/>
-
-  <!-- ==============================
-       ESTILOS ESPECÍFICOS
-       - Layout: mapa + panel lateral
-       - Altura del mapa (obligatoria)
-       - Aspecto del panel e imagen
-       - Leyenda y rejilla de filtros
-       ============================== -->
   <style>
     .layout { display:flex; gap:12px; }
     #map-mov { flex:3; height:72vh; border:2px solid #ccc; }
@@ -37,48 +22,25 @@
   </style>
 </head>
 <body>
-  <!-- ==============================
-       CABECERA (HEADER)
-       - Logo con enlace a inicio
-       - Título de la sección
-       ============================== -->
   <div class="pagina">
     <header>
       <a href="index.html"><img src="imagenes/Logo.png" alt="Logo"></a>
       <h1>Movilidad: Villa Anny II</h1>
     </header>
 
-    <!-- ==============================
-         NAVEGACIÓN (NAVBAR)
-         - Menú principal del sitio
-         - Clase "active" en la página actual
-         ============================== -->
-    <nav class="navbar">
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="equipamientos.html">Equipamientos</a></li>
-        <li><a class="active" href="movilidad.html">Movilidad</a></li>        
-        <li><a href="catastro3d.html">Catastro 3D</a></li>
-        <li><a href="recorrido3d.html">Recorrido 3D</a></li>
-        <li><a href="problematicas.html">Problemáticas</a></li>
-        <li><a href="acerca_de.html">Acerca de</a></li>
-      </ul>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="equipamientos.html">Equipamientos</a>
+      <a href="movilidad.html" class="active">Movilidad</a>
+      <a href="#">Problemáticas</a>
+      <a href="acerca_de.html">Acerca de</a>
     </nav>
 
-    <!-- ==============================
-         CONTENIDO PRINCIPAL
-         - Título y ayuda de uso
-         - Layout en dos columnas:
-           * Mapa Leaflet (#map-mov)
-           * Panel lateral (filtros + info)
-         ============================== -->
     <main>
       <h2>Vías y movilidad</h2>
       <p class="soft">Vías en rojo (más claras a mayor clase). Usa los filtros para mostrar/ocultar tipos.</p>
-
       <div class="layout" style="margin-bottom:16px;">
         <div id="map-mov"></div>
-
         <aside id="panel-mov">
           <h3>Filtros</h3>
           <div class="filters">
@@ -87,10 +49,8 @@
             <label><input type="checkbox" data-tipo="DG" checked> DG (Diagonal)</label>
             <label><input type="checkbox" data-tipo="TV" checked> TV (Transversal)</label>
           </div>
-
           <h3>Información</h3>
           <div id="info-mov" class="soft">Acerca el cursor a una vía o haz clic en un paradero…</div>
-
           <div id="info-img-wrap" style="margin-top:12px; display:none;">
             <img id="info-img" class="info-img" alt="Imagen informativa"/>
           </div>
@@ -98,20 +58,11 @@
       </div>
     </main>
 
-    <!-- ==============================
-         PIE DE PÁGINA (FOOTER)
-         - Derechos de autor / créditos
-         ============================== -->
     <footer>
       <p>© 2025 Todos los derechos reservados</p>
     </footer>
   </div>
 
-  <!-- ==============================
-       SCRIPTS
-       - Leaflet (librería de mapa)
-       - Lógica de la página (movilidad.js)
-       ============================== -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="movilidad.js"></script>
 </body>
